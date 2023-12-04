@@ -1,49 +1,67 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"log"
-	"net/http"
+	"os"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-// Message represents the structure of the message to be sent
-type Message struct {
-	ChatID int64  `json:"chat_id"`
-	Text   string `json:"text"`
+var (
+	msg tgbotapi.MessageConfig
+)
+
+func botInit() {
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_APITOKEN"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	bot.Debug = true
+
+	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates := bot.GetUpdatesChan(u)
+
+	for update := range updates {
+
+		msg = tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
+		// Irrelevant scenario
+		if update.Message == nil {
+			continue
+		} else if update.Message.Command() == "help" {
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, generateHelpText())
+		} else if update.Message.Command() != "" {
+			msg = botObey(update)
+		} else {
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, `
+			Message not a command! Good luck talking to yourself! Try /help for list of available comands :)
+			`)
+		}
+
+		if _, err := bot.Send(msg); err != nil {
+			log.Panic(err)
+		}
+	}
 }
 
-// SendMessage sends a message via Telegram
-func SendMessage(chatId int64, botToken string, text string, silent bool) {
-	message := Message{
-		ChatID: chatId,
-		Text:   text,
+func botObey(update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
+
+	// Check if the received message contains a known command
+	command := update.Message.Command()
+	reply, found := CommandMap[command]
+	if found {
+		replyStr := reply()
+		msg = tgbotapi.NewMessage(update.Message.Chat.ID, replyStr)
+	} else {
+		// If the command is unknown, send a default reply
+		msg = tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know that command")
+		// Send the default reply message using your Telegram bot API client
+		// bot.Send(msg)
 	}
-
-	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", botToken)
-
-	if silent {
-		apiURL += "?disable_notification=true" // Add the parameter to send the message silently
-	}
-
-	requestBody, err := json.Marshal(message)
-	if err != nil {
-		log.Printf("Error encoding message: %s\nMessage content: %+v\n", err, message.Text)
-		return
-	}
-
-	resp, err := http.Post(apiURL, "application/json", bytes.NewBuffer(requestBody))
-	if err != nil {
-		log.Printf("Error sending message: %s\nMessage content: %+v\n", err, message.Text)
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Unexpected status code: %d\nMessage content: %+v\n", resp.StatusCode, message.Text)
-		return
-	}
-
-	log.Printf("Message: \"%s\" sent successfully!", message.Text)
+	return msg
 }
