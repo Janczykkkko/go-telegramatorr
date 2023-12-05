@@ -13,7 +13,7 @@ var (
 func botInit() {
 	bot, err := tgbotapi.NewBotAPI(telegramApiKey)
 	if err != nil {
-		log.Fatal("Error connecting to bot, is the apikey correct?")
+		log.Fatal("Error connecting to bot, is the apikey correct?", err)
 	}
 	bot.Debug = true
 
