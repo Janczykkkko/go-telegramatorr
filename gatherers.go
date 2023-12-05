@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -46,9 +45,8 @@ func GetSessions() string {
 			} else {
 				state = "in progress"
 			}
-			mediaSourceId, err := strconv.Atoi(obj.PlayState.MediaSourceID)
 			if err == nil {
-				bitrate = float64(obj.NowPlayingQueueFullItems[0].MediaSources[mediaSourceId].Bitrate) / 1000000.0
+				bitrate = float64(obj.NowPlayingQueueFullItems[0].MediaSources[0].Bitrate) / 1000000.0
 			} else {
 				bitrate = 0.0
 			}
