@@ -36,7 +36,8 @@ func GetSessions() string {
 	for _, obj := range JellyJSON {
 		var sessionString string
 		if len(obj.NowPlayingQueueFullItems) > 0 &&
-			len(obj.NowPlayingQueueFullItems[0].MediaSources) > 0 {
+			//len(obj.NowPlayingQueueFullItems[0].MediaSources) > 0 &&
+			obj.PlayState.PlayMethod != "" {
 			var state string
 
 			if !obj.PlayState.IsPaused {
@@ -47,12 +48,16 @@ func GetSessions() string {
 			bitrate := float64(obj.NowPlayingQueueFullItems[0].MediaSources[0].Bitrate) / 1000000.0
 			name := obj.NowPlayingQueueFullItems[0].MediaSources[0].Name
 			sessionString = fmt.Sprintf("%s is playing (%s): %s\nPlayback: %s\nBitrate: %.2f Mbps\nDevice: %s\n", obj.UserName, state, name, obj.PlayState.PlayMethod, bitrate, obj.DeviceName)
+		} else if len(obj.NowPlayingQueueFullItems) > 0 &&
+			//len(obj.NowPlayingQueueFullItems[0].MediaSources) > 0 &&
+			obj.PlayState.PlayMethod == "" {
+			continue
 		} else {
 			sessionString = fmt.Sprintf("%s is chilling in the menus\n", obj.UserName)
 		}
 		sessionStrings = append(sessionStrings, sessionString)
 	}
 	formattedSessions = genericInfo + strings.Join(sessionStrings, "\n")
-	// Type assertion to extract the integer value
+
 	return formattedSessions
 }
