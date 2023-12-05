@@ -40,7 +40,7 @@ func GetSessions() string {
 			obj.PlayState.PlayMethod != "" {
 			var state string
 
-			if !obj.PlayState.IsPaused {
+			if obj.PlayState.IsPaused {
 				state = "paused"
 			} else {
 				state = "in progress"
