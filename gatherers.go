@@ -61,15 +61,15 @@ func GetSessions() string {
 
 			sessionString = fmt.Sprintf("%s is playing (%s): %s\nPlayback: %s\nBitrate: %.2f Mbps\nSubtitles: %s\nDevice: %s\n", obj.UserName, state, name, obj.PlayState.PlayMethod, bitrate, substream, obj.DeviceName)
 
-		} else if len(obj.NowPlayingQueueFullItems) > 0 &&
-			obj.PlayState.PlayMethod == "" {
-			continue
 		} else {
-			sessionString = fmt.Sprintf("%s is chilling in the menus on %s\n", obj.UserName, obj.DeviceName)
+			continue
 		}
 		sessionStrings = append(sessionStrings, sessionString)
 	}
-	formattedSessions = genericInfo + strings.Join(sessionStrings, "\n")
-
+	if len(strings.Join(sessionStrings, "\n")) != 0 {
+		formattedSessions = genericInfo + strings.Join(sessionStrings, "\n")
+	} else {
+		formattedSessions = "Nothing is playing"
+	}
 	return formattedSessions
 }
