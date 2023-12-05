@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -36,24 +37,37 @@ func GetSessions() string {
 	for _, obj := range JellyJSON {
 		var sessionString string
 		if len(obj.NowPlayingQueueFullItems) > 0 &&
-			//len(obj.NowPlayingQueueFullItems[0].MediaSources) > 0 &&
 			obj.PlayState.PlayMethod != "" {
 			var state string
-
+			var bitrate float64
+			var substream string
 			if obj.PlayState.IsPaused {
 				state = "paused"
 			} else {
 				state = "in progress"
 			}
-			bitrate := float64(obj.NowPlayingQueueFullItems[0].MediaSources[0].Bitrate) / 1000000.0
+			mediaSourceId, err := strconv.Atoi(obj.PlayState.MediaSourceID)
+			if err == nil {
+				bitrate = float64(obj.NowPlayingQueueFullItems[0].MediaSources[mediaSourceId].Bitrate) / 1000000.0
+			} else {
+				bitrate = 0.0
+			}
 			name := obj.NowPlayingQueueFullItems[0].MediaSources[0].Name
-			sessionString = fmt.Sprintf("%s is playing (%s): %s\nPlayback: %s\nBitrate: %.2f Mbps\nDevice: %s\n", obj.UserName, state, name, obj.PlayState.PlayMethod, bitrate, obj.DeviceName)
+
+			SubtitleStreamIndex := obj.PlayState.SubtitleStreamIndex
+			if SubtitleStreamIndex >= 0 && SubtitleStreamIndex < len(obj.NowPlayingQueueFullItems[0].MediaStreams) {
+				substream = obj.NowPlayingQueueFullItems[0].MediaStreams[obj.PlayState.SubtitleStreamIndex].DisplayTitle
+			} else {
+				substream = "None"
+			}
+
+			sessionString = fmt.Sprintf("%s is playing (%s): %s\nPlayback: %s\nBitrate: %.2f Mbps\nSubtitles: %s\nDevice: %s\n", obj.UserName, state, name, obj.PlayState.PlayMethod, bitrate, substream, obj.DeviceName)
+
 		} else if len(obj.NowPlayingQueueFullItems) > 0 &&
-			//len(obj.NowPlayingQueueFullItems[0].MediaSources) > 0 &&
 			obj.PlayState.PlayMethod == "" {
 			continue
 		} else {
-			sessionString = fmt.Sprintf("%s is chilling in the menus\n", obj.UserName)
+			sessionString = fmt.Sprintf("%s is chilling in the menus on %s\n", obj.UserName, obj.DeviceName)
 		}
 		sessionStrings = append(sessionStrings, sessionString)
 	}
