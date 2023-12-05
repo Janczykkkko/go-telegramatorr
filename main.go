@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -15,6 +14,5 @@ func main() {
 	jellyfinAddress = os.Getenv("JELLYFIN_ADDRESS")
 	jellyfinApiKey = os.Getenv("JELLYFIN_APIKEY")
 	telegramApiKey = os.Getenv("TELEGRAM_APIKEY")
-	fmt.Println(GetSessions())
-	//botInit()
+	botInit()
 }
