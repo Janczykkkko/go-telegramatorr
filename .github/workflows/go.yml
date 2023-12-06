@@ -7,6 +7,8 @@ on:
 
 jobs:
   build-and-publish:
+    if: contains(github.event.head_commit.message, 'v[0-9]+\.[0-9]+\.[0-9]+')
+  
     runs-on: ubuntu-latest
 
     steps:
@@ -30,9 +32,3 @@ jobs:
       - name: Build and tag Docker image
         run: |
           docker buildx build --push --tag januszadlo/go-telegramator:${{ steps.extract_version.outputs.VERSION }} .
-
-      - name: Push git tag for the new version
-        if: success()
-        run: |
-          git tag ${{ steps.extract_version.outputs.VERSION }}
-          git push origin ${{ steps.extract_version.outputs.VERSION }}
