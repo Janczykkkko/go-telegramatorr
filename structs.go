@@ -21,7 +21,10 @@ type JellySession struct {
 	LastActivityDate    time.Time `json:"LastActivityDate"`
 	LastPlaybackCheckIn time.Time `json:"LastPlaybackCheckIn"`
 	DeviceName          string    `json:"DeviceName"`
-	FullNowPlayingItem  struct {
+	NowPlayingItem      struct {
+		Name string `json:"Name"`
+	}
+	FullNowPlayingItem struct {
 		Size          int64     `json:"Size"`
 		Container     string    `json:"Container"`
 		IsHD          bool      `json:"IsHD"`
@@ -30,6 +33,7 @@ type JellySession struct {
 		Height        int       `json:"Height"`
 		ExtraIds      []any     `json:"ExtraIds"`
 		DateLastSaved time.Time `json:"DateLastSaved"`
+		Name          string    `json:"Name"`
 	} `json:"FullNowPlayingItem"`
 	DeviceID              string `json:"DeviceId"`
 	ApplicationVersion    string `json:"ApplicationVersion"`

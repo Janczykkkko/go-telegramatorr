@@ -61,6 +61,15 @@ func GetSessions() string {
 
 			sessionString = fmt.Sprintf("%s is playing (%s): %s\nPlayback: %s\nBitrate: %.2f Mbps\nSubtitles: %s\nDevice: %s\n", obj.UserName, state, name, obj.PlayState.PlayMethod, bitrate, substream, obj.DeviceName)
 
+		} else if len(obj.FullNowPlayingItem.Container) > 0 && //mobile not showing fix
+			obj.PlayState.PlayMethod != "" &&
+			!obj.PlayState.IsPaused {
+
+			var name string
+
+			name = obj.NowPlayingItem.Name
+
+			sessionString = fmt.Sprintf("%s is playing: %s\nPlayback: %s\nDevice: %s\n", obj.UserName, name, obj.PlayState.PlayMethod, obj.DeviceName)
 		} else {
 			continue
 		}
