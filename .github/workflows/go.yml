@@ -29,7 +29,7 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker buildx build --push --tag your-docker-username/your-repo-name:${{ steps.extract_version.outputs.VERSION }} .
+          docker buildx build --push --tag januszadlo/go-telegramator:${{ steps.extract_version.outputs.VERSION }} .
 
       - name: Push git tag for the new version
         if: success()
