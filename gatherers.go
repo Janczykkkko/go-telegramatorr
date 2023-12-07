@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -64,7 +65,16 @@ func GetSessions() string {
 		} else if len(obj.FullNowPlayingItem.Container) > 0 && //mobile not showing fix
 			obj.PlayState.PlayMethod != "" &&
 			!obj.PlayState.IsPaused {
-			sessionString = fmt.Sprintf("%s is playing: %s\nPlayback: %s\nDevice: %s\n", obj.UserName, obj.NowPlayingItem.Name, obj.PlayState.PlayMethod, obj.DeviceName)
+			var bitrateData int
+			for _, stream := range obj.NowPlayingItem.MediaStreams {
+				if stream.Type == "Video" {
+					bitrateData = stream.BitRate
+					break
+				}
+			}
+			bitrateFloat := float64(bitrateData) / 1000000.0
+			bitrate := strconv.FormatFloat(bitrateFloat, 'f', -1, 64)
+			sessionString = fmt.Sprintf("%s is playing(%s): %s\nPlayback: %s\nBitrate: %s Mbps\nDevice: %s\n", obj.UserName, obj.DeviceName, obj.NowPlayingItem.Name, obj.PlayState.PlayMethod, bitrate, obj.DeviceName)
 		} else {
 			continue
 		}
