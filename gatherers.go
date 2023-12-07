@@ -64,12 +64,7 @@ func GetSessions() string {
 		} else if len(obj.FullNowPlayingItem.Container) > 0 && //mobile not showing fix
 			obj.PlayState.PlayMethod != "" &&
 			!obj.PlayState.IsPaused {
-
-			var name string
-
-			name = obj.NowPlayingItem.Name
-
-			sessionString = fmt.Sprintf("%s is playing: %s\nPlayback: %s\nDevice: %s\n", obj.UserName, name, obj.PlayState.PlayMethod, obj.DeviceName)
+			sessionString = fmt.Sprintf("%s is playing: %s\nPlayback: %s\nDevice: %s\n", obj.UserName, obj.NowPlayingItem.Name, obj.PlayState.PlayMethod, obj.DeviceName)
 		} else {
 			continue
 		}
