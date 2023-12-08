@@ -23,16 +23,19 @@ func GetSessions() string {
 	resp, err := http.Get(url)
 	if err != nil {
 		formattedSessions = "Error fetching sessions: " + err.Error()
+		return formattedSessions
 	}
 	defer resp.Body.Close()
 	log.Printf("API request to %s completed with status code: %d", jellyfinAddress, resp.StatusCode)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		formattedSessions = "Error fetching sessions: " + err.Error()
+		return formattedSessions
 	}
 	err = json.Unmarshal(body, &JellyJSON)
 	if err != nil {
 		formattedSessions = "Error fetching sessions: " + err.Error()
+		return formattedSessions
 	}
 	for _, obj := range JellyJSON {
 		var sessionString string
@@ -46,11 +49,7 @@ func GetSessions() string {
 			} else {
 				state = "in progress"
 			}
-			if err == nil {
-				bitrate = float64(obj.NowPlayingQueueFullItems[0].MediaSources[0].Bitrate) / 1000000.0
-			} else {
-				bitrate = 0.0
-			}
+			bitrate = float64(obj.NowPlayingQueueFullItems[0].MediaSources[0].Bitrate) / 1000000.0
 			name := obj.NowPlayingQueueFullItems[0].MediaSources[0].Name
 
 			SubtitleStreamIndex := obj.PlayState.SubtitleStreamIndex
@@ -83,7 +82,7 @@ func GetSessions() string {
 	if len(strings.Join(sessionStrings, "\n")) != 0 {
 		formattedSessions = genericInfo + strings.Join(sessionStrings, "\n")
 	} else {
-		formattedSessions = "Nothing is playing"
+		formattedSessions = "Nothing is playing - haha"
 	}
 	return formattedSessions
 }
