@@ -65,6 +65,13 @@ func GetSessions() string {
 			obj.PlayState.PlayMethod != "" &&
 			!obj.PlayState.IsPaused {
 			var bitrateData int
+			var substream string
+			var state string
+			if obj.PlayState.IsPaused {
+				state = "paused"
+			} else {
+				state = "in progress"
+			}
 			for _, stream := range obj.NowPlayingItem.MediaStreams {
 				if stream.Type == "Video" {
 					bitrateData = stream.BitRate
@@ -73,7 +80,13 @@ func GetSessions() string {
 			}
 			bitrateFloat := float64(bitrateData) / 1000000.0
 			bitrate := strconv.FormatFloat(bitrateFloat, 'f', -1, 64)
-			sessionString = fmt.Sprintf("%s is playing(%s): %s\nPlayback: %s\nBitrate: %s Mbps\nDevice: %s\n", obj.UserName, obj.DeviceName, obj.NowPlayingItem.Name, obj.PlayState.PlayMethod, bitrate, obj.DeviceName)
+			SubtitleStreamIndex := obj.PlayState.SubtitleStreamIndex
+			if SubtitleStreamIndex >= 0 && SubtitleStreamIndex < len(obj.NowPlayingItem.MediaStreams) {
+				substream = obj.NowPlayingItem.MediaStreams[obj.PlayState.SubtitleStreamIndex].DisplayTitle
+			} else {
+				substream = "None"
+			}
+			sessionString = fmt.Sprintf("%s is playing(%s): %s\nPlayback: %s\nBitrate: %s Mbps\nSubtitles: %s\nDevice: %s\n", obj.UserName, state, obj.NowPlayingItem.Name, obj.PlayState.PlayMethod, bitrate, substream, obj.DeviceName)
 		} else {
 			continue
 		}
