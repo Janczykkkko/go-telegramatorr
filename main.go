@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 var (
@@ -14,9 +12,6 @@ var (
 	jellyfinApiKey  string
 	telegramApiKey  string
 	botMonitor      bool
-	bot             *tgbotapi.BotAPI
-	updates         tgbotapi.UpdatesChannel
-	u               tgbotapi.UpdateConfig
 )
 
 func main() {
