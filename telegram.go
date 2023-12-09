@@ -11,7 +11,8 @@ var (
 )
 
 func botInit() {
-	bot, err := tgbotapi.NewBotAPI(telegramApiKey)
+	var err error
+	bot, err = tgbotapi.NewBotAPI(telegramApiKey)
 	if err != nil {
 		log.Fatal("Error connecting to bot, is the apikey correct?", err)
 	}
@@ -19,10 +20,21 @@ func botInit() {
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	u := tgbotapi.NewUpdate(0)
+	u = tgbotapi.NewUpdate(0)
 	u.Timeout = 60
+	// watch for commands
+	go botWatch()
 
-	updates := bot.GetUpdatesChan(u)
+	// start monitoring and updating on user playback if enabled
+	if botMonitor {
+		go botMonitorAndInform(u)
+	}
+	// all goroutines are meant to run idefinitely
+	select {}
+}
+
+func botWatch() {
+	updates = bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, "")
@@ -53,4 +65,8 @@ func botObey(update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know that command")
 	}
 	return msg
+}
+
+func botMonitorAndInform(u tgbotapi.UpdateConfig) {
+
 }
