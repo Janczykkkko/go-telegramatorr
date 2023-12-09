@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -23,10 +24,9 @@ func botInit() {
 	u.Timeout = 60
 	// watch for commands
 	go botWatch(u, bot)
-
 	// start monitoring and updating on user playback if enabled
 	if botMonitor {
-		go botMonitorAndInform(u)
+		go botMonitorAndInform(u, bot)
 	}
 	// all goroutines are meant to run idefinitely
 	select {}
@@ -67,6 +67,24 @@ func botObey(update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 	return msg
 }
 
-func botMonitorAndInform(u tgbotapi.UpdateConfig) {
+func botMonitorAndInform(u tgbotapi.UpdateConfig, bot *tgbotapi.BotAPI) {
+	var activeSessions []ActiveSession
+	for {
+		jellyJSON, err := GetSessions()
+		if err != nil {
+			errMsg := "Error: " + err.Error()
+			fmt.Println(errMsg)
+		}
+		for _, obj := range jellyJSON {
+			if len(obj.NowPlayingQueueFullItems) > 0 ||
+				len(obj.FullNowPlayingItem.Container) > 0 &&
+					obj.PlayState.PlayMethod != "" &&
+					!obj.PlayState.IsPaused {
 
+			} else {
+				continue
+			}
+		}
+		// eval if notifying
+	}
 }

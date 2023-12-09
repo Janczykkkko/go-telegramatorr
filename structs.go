@@ -2,6 +2,12 @@ package main
 
 import "time"
 
+type ActiveSession struct {
+	UserName   string
+	Item       string
+	DeviceName string
+}
+
 type JellySession struct {
 	PlayState struct {
 		PositionTicks       int    `json:"PositionTicks"`
