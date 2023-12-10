@@ -35,8 +35,36 @@ func botInit() {
 func botWatch(u tgbotapi.UpdateConfig, bot *tgbotapi.BotAPI) {
 	updates := bot.GetUpdatesChan(u)
 
-	for update := range updates {
+	/* Reporting logic
+	   1. loop catch sessions every 30s
 
+	   2. put sessions in struct - currentSessions
+
+	   2.1 handle changes to subs, bitrate, playmethod, playstate to avoid duplication
+
+	   3. compare currentSessions with timedSessions
+
+	   3.1 if timed, no marks, in current:
+	   3.1.1 check if PlayState changed
+	   3.1.2 swap tickers as / if needed, continue
+
+	   3.2 if timed, not in current, mark +1 (max 60):
+	   3.2.1 pause ticker, continue
+
+	   3.3 if timed, marks, reapeared in current:
+	   3.3.1 reset marks
+	   3.3.2 resume appropriate ticker, continue
+
+	   3.4 if not timed, in current:
+	   3.4.1 add to timed
+
+	   3.4.2 start ticker, continue
+
+	   3.5 if timed, 60 marks, not in current, remove & push report
+
+	   4. check timed sessions for abnormal session length (5h+), if found purge and push report
+	*/
+	for update := range updates {
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		if update.Message == nil {
 			continue
