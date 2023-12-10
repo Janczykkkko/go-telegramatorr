@@ -3,13 +3,8 @@ package main
 import "time"
 
 type ActiveSession struct {
-	UserName   string
-	Item       string
-	DeviceName string
-	PlayMethod string
-	Bitrate    string
-	SubStream  string
-	PlayState  string
+	UserName string
+	ItemID   string
 }
 
 type JellySession struct {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -34,36 +35,6 @@ func botInit() {
 
 func botWatch(u tgbotapi.UpdateConfig, bot *tgbotapi.BotAPI) {
 	updates := bot.GetUpdatesChan(u)
-
-	/* Reporting logic
-	   1. loop catch sessions every 30s
-
-	   2. put sessions in struct - currentSessions
-
-	   2.1 handle changes to subs, bitrate, playmethod, playstate to avoid duplication
-
-	   3. compare currentSessions with timedSessions
-
-	   3.1 if timed, no marks, in current:
-	   3.1.1 check if PlayState changed
-	   3.1.2 swap tickers as / if needed, continue
-
-	   3.2 if timed, not in current, mark +1 (max 60):
-	   3.2.1 pause ticker, continue
-
-	   3.3 if timed, marks, reapeared in current:
-	   3.3.1 reset marks
-	   3.3.2 resume appropriate ticker, continue
-
-	   3.4 if not timed, in current:
-	   3.4.1 add to timed
-
-	   3.4.2 start ticker, continue
-
-	   3.5 if timed, 60 marks, not in current, remove & push report
-
-	   4. check timed sessions for abnormal session length (5h+), if found purge and push report
-	*/
 	for update := range updates {
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		if update.Message == nil {
@@ -96,23 +67,47 @@ func botObey(update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 }
 
 func botMonitorAndInform(u tgbotapi.UpdateConfig, bot *tgbotapi.BotAPI) {
-	var activeSessions []ActiveSession
-	for {
+	var skipOnErr bool = false
+	activeStreams := make(map[string]time.Time)
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+	for range ticker.C {
 		jellyJSON, err := GetSessions()
 		if err != nil {
 			errMsg := "Error: " + err.Error()
 			fmt.Println(errMsg)
+			skipOnErr = true
+			continue
 		}
-		for _, obj := range jellyJSON {
-			if len(obj.NowPlayingQueueFullItems) > 0 ||
-				len(obj.FullNowPlayingItem.Container) > 0 &&
-					obj.PlayState.PlayMethod != "" &&
-					!obj.PlayState.IsPaused {
-
-			} else {
-				continue
+		fmt.Println(time.Now(), "TRACE: Stream data collected succesfully")
+		if !skipOnErr {
+			//Get active streams
+			for _, obj := range jellyJSON {
+				key := obj.UserName + "_" + obj.ID
+				activeStreams[key] = time.Now()
+				fmt.Println(time.Now(), "TRACE: Stream registered: ", key)
+				//do shit
 			}
+			//Get stopped streams
+			for key := range activeStreams {
+				found := false
+				for _, obj := range jellyJSON {
+					if key == (obj.UserName + "_" + obj.ID) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					fmt.Println("Stream ", key, " ran for ", time.Since(activeStreams[key]))
+					delete(activeStreams, key)
+					fmt.Println(time.Now(), "TRACE: Stream deregistered: ", key)
+				}
+			}
+
 		}
-		// eval if notifying
+		fmt.Println("TRACE: Active Sessions monitored:")
+		for key, val := range activeStreams {
+			fmt.Println(key, " running for ", val)
+		}
 	}
 }
