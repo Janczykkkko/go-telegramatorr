@@ -3,8 +3,10 @@ package main
 import "time"
 
 type ActiveSession struct {
-	UserName string
-	ItemID   string
+	UserName  string
+	MediaID   string
+	MediaName string
+	StartTime time.Time
 }
 
 type JellySession struct {
