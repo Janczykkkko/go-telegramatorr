@@ -1,43 +1,25 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
 	"strconv"
 	"strings"
 )
 
-// GetSessions fetches sessions from Jellyfin
-func GetSessions() string {
+func GetSessionsStr() string {
 	var (
-		JellyJSON         []JellySession
-		genericInfo       string
-		sessionStrings    []string
 		formattedSessions string
+		sessionStrings    []string
 	)
-	genericInfo = "Here's an activity report from Jellyfin: \n\n"
-	url := jellyfinAddress + "/Sessions?api_key=" + jellyfinApiKey
-	resp, err := http.Get(url)
+	genericInfo := "Here's an activity report from Jellyfin: \n\n"
+
+	jellyJSON, err := GetSessions()
 	if err != nil {
-		formattedSessions = "Error fetching sessions: " + err.Error()
-		return formattedSessions
+		errMsg := "Error: " + err.Error()
+		return errMsg
 	}
-	defer resp.Body.Close()
-	log.Printf("API request to %s completed with status code: %d", jellyfinAddress, resp.StatusCode)
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		formattedSessions = "Error fetching sessions: " + err.Error()
-		return formattedSessions
-	}
-	err = json.Unmarshal(body, &JellyJSON)
-	if err != nil {
-		formattedSessions = "Error fetching sessions: " + err.Error()
-		return formattedSessions
-	}
-	for _, obj := range JellyJSON {
+
+	for _, obj := range jellyJSON {
 		var sessionString string
 		if len(obj.NowPlayingQueueFullItems) > 0 &&
 			obj.PlayState.PlayMethod != "" {
@@ -95,7 +77,7 @@ func GetSessions() string {
 	if len(strings.Join(sessionStrings, "\n")) != 0 {
 		formattedSessions = genericInfo + strings.Join(sessionStrings, "\n")
 	} else {
-		formattedSessions = "Nothing is playing - haha"
+		formattedSessions = "Nothing is playing."
 	}
 	return formattedSessions
 }

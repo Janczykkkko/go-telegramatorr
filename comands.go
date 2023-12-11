@@ -7,6 +7,7 @@ var CommandMap = map[string]CommandFunc{
 		return "Hi!"
 	},
 	"jellystatus": func() string {
-		return GetSessions()
+
+		return GetSessionsStr()
 	},
 }
