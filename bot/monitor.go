@@ -1,76 +1,22 @@
-package main
+package bot
 
 import (
 	"fmt"
 	"log"
 	"math"
-	"strconv"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func botInit() {
-	bot, err := tgbotapi.NewBotAPI(telegramApiKey)
-	if err != nil {
-		log.Fatal("Error connecting to bot, is the apikey correct?", err)
-	}
-
-	chatID, err := strconv.ParseInt(telegramChatId, 10, 64)
-	if err != nil {
-		log.Fatal("Error parsing chat id", err)
-	}
-
-	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	// watch for commands
-	go botWatch(u, bot)
-	// start monitoring and updating on user playback if enabled
-	if botMonitor {
-		go botMonitorAndInform(bot, chatID)
-	}
-	// all goroutines are meant to run idefinitely
-	select {}
+type ActiveSession struct {
+	UserName  string
+	MediaID   string
+	MediaName string
+	StartTime time.Time
 }
 
-func botWatch(u tgbotapi.UpdateConfig, bot *tgbotapi.BotAPI) {
-	var msg tgbotapi.MessageConfig
-	updates := bot.GetUpdatesChan(u)
-	for update := range updates {
-		if update.Message == nil {
-			continue
-		} else if update.Message.Command() == "help" {
-			msg = tgbotapi.NewMessage(update.Message.Chat.ID, generateHelpText())
-		} else if update.Message.Command() != "" {
-			msg = botObey(update)
-		} else {
-			msg = tgbotapi.NewMessage(update.Message.Chat.ID, `
-			Message not a command! Good luck talking to yourself! Try /help for list of available comands :)
-			`)
-		}
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Error sending message: %s", err)
-		}
-	}
-}
-
-func botObey(update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
-	command := update.Message.Command()
-	reply, found := CommandMap[command]
-	if found {
-		replyStr := reply()
-		msg = tgbotapi.NewMessage(update.Message.Chat.ID, replyStr)
-	} else {
-		msg = tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know that command")
-	}
-	return msg
-}
-
-func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
+func MonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
 	var msg tgbotapi.MessageConfig
 	var activeStreams []ActiveSession
 	var msgStr string

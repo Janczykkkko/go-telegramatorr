@@ -1,33 +1,30 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
-	"strconv"
+	"telegramatorr/bot"
 )
 
-var (
-	jellyfinAddress string
-	jellyfinApiKey  string
-	plexAddress     string
-	plexApiKey      string
-	telegramApiKey  string
-	botMonitor      bool
-	telegramChatId  string
-)
+// Config struct holds all the environment variables
+var env = map[string]string{
+	"jellyfinAddress": os.Getenv("JELLYFIN_ADDRESS"),
+	"jellyfinAPIKey":  os.Getenv("JELLYFIN_APIKEY"),
+	"plexAddress":     os.Getenv("PLEX_ADDRESS"),
+	"plexAPIKey":      os.Getenv("PLEX_APIKEY"),
+	"telegramAPIKey":  os.Getenv("TELEGRAM_APIKEY"),
+	"telegramChatID":  os.Getenv("TELEGRAM_CHATID"),
+}
+
+func CheckConfig() {
+	for key, val := range env {
+		if val == "" {
+			log.Printf("%s variable not provided, disabling related features...", key)
+		}
+	}
+}
 
 func main() {
-	jellyfinAddress = os.Getenv("JELLYFIN_ADDRESS")
-	jellyfinApiKey = os.Getenv("JELLYFIN_APIKEY")
-	plexAddress = os.Getenv("PLEX_ADDRESS")
-	plexApiKey = os.Getenv("PLEX_APIKEY")
-	telegramApiKey = os.Getenv("TELEGRAM_APIKEY")
-	telegramChatId = os.Getenv("TELEGRAM_CHATID")
-	var err error
-	botMonitor, err = strconv.ParseBool(os.Getenv("BOT_MONITOR"))
-	if err != nil {
-		fmt.Println("BOT_MONITOR variable unspecified or incorrect. Disabling botMonitor")
-		botMonitor = false
-	}
-	botInit()
+	CheckConfig()
+	bot.Init(env)
 }

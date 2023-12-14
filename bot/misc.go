@@ -1,10 +1,10 @@
-package main
+package bot
 
 import (
 	"fmt"
 )
 
-func generateHelpText() string {
+func GenerateHelpText() string {
 	helpText := "I understand: "
 	for key := range CommandMap {
 		helpText += fmt.Sprintf("/%s ", key)

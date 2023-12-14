@@ -1,30 +1,18 @@
-package main
+package gatherers
 
 import (
 	"fmt"
 	"strings"
-	"telegramatorr/gatherers"
 )
 
-type CommandFunc func() string
-
-var CommandMap = map[string]CommandFunc{
-	"sayhi": func() string {
-		return "Hi!"
-	},
-	"jellystatus": func() string {
-		return GetSessionsStr()
-	},
-}
-
-func GetAllSessionsStr() string {
+func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) string {
 	response := []string{"Here's a report from your player(s):\n"}
 
-	jellySessions, err := gatherers.GetJellySessions(jellyfinAddress, jellyfinApiKey)
+	jellySessions, err := GetJellySessions(jellyfinAddress, jellyfinApiKey)
 	if err != nil {
 		response = append(response, fmt.Sprintf("Error getting Jellyfin sessions: %s", err))
 	}
-	plexSessions, err := gatherers.GetPlexSessions(plexAddress, plexApiKey)
+	plexSessions, err := GetPlexSessions(plexAddress, plexApiKey)
 	if err != nil {
 		response = append(response, fmt.Sprintf("Error getting Plex sessions: %s", err))
 	}
