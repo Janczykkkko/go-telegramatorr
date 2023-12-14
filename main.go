@@ -9,6 +9,8 @@ import (
 var (
 	jellyfinAddress string
 	jellyfinApiKey  string
+	plexAddress     string
+	plexApiKey      string
 	telegramApiKey  string
 	botMonitor      bool
 	telegramChatId  string
@@ -17,6 +19,8 @@ var (
 func main() {
 	jellyfinAddress = os.Getenv("JELLYFIN_ADDRESS")
 	jellyfinApiKey = os.Getenv("JELLYFIN_APIKEY")
+	plexAddress = os.Getenv("PLEX_ADDRESS")
+	plexApiKey = os.Getenv("PLEX_APIKEY")
 	telegramApiKey = os.Getenv("TELEGRAM_APIKEY")
 	telegramChatId = os.Getenv("TELEGRAM_CHATID")
 	var err error
