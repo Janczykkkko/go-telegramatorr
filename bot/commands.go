@@ -11,10 +11,6 @@ var CommandMap = map[string]CommandFunc{
 		return "Hi!"
 	},
 	"jellystatus": func() string {
-		return GetSessionsStr()
+		return gatherers.GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
 	},
-}
-
-func GetSessionsStr() string {
-	return gatherers.GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
 }

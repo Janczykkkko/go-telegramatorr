@@ -6,18 +6,32 @@ import (
 )
 
 func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) string {
+
 	response := []string{"Here's a report from your player(s):\n"}
 
-	jellySessions, err := GetJellySessions(jellyfinAddress, jellyfinApiKey)
-	if err != nil {
-		response = append(response, fmt.Sprintf("Error getting Jellyfin sessions: %s", err))
+	var jellySessions []SessionData
+	if jellyfinAddress != "" || jellyfinApiKey != "" {
+		sessions, err := GetJellySessions(jellyfinAddress, jellyfinApiKey)
+		if err != nil {
+			response = append(response, fmt.Sprintf("Error getting Jellyfin sessions: %s", err))
+		}
+		jellySessions = sessions
 	}
-	plexSessions, err := GetPlexSessions(plexAddress, plexApiKey)
-	if err != nil {
-		response = append(response, fmt.Sprintf("Error getting Plex sessions: %s", err))
+
+	var plexSessions []SessionData
+	if plexAddress != "" || plexApiKey != "" {
+		sessions, err := GetPlexSessions(plexAddress, plexApiKey)
+		if err != nil {
+			response = append(response, fmt.Sprintf("Error getting Plex sessions: %s", err))
+		}
+		plexSessions = sessions
 	}
 
 	sessions := append(plexSessions, jellySessions...)
+
+	if len(sessions) == 0 {
+		return "Nothing is playing."
+	}
 
 	for _, session := range sessions {
 		response = append(response, fmt.Sprintf(
@@ -32,8 +46,5 @@ func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey 
 		))
 	}
 
-	if len(response) == 1 {
-		return "Nothing is playing."
-	}
 	return strings.Join(response, "\n")
 }

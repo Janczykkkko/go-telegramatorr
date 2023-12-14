@@ -11,6 +11,7 @@ import (
 
 // Get Jellyfin data and parse it into a struct
 func GetJellyData(jellyfinAddress, jellyfinApiKey string) (sessions JellySessions, err error) {
+
 	url := fmt.Sprintf(jellyfinAddress + "/Sessions?api_key=" + jellyfinApiKey)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -32,6 +33,7 @@ func GetJellyData(jellyfinAddress, jellyfinApiKey string) (sessions JellySession
 
 // Ingest Jellyfin data and assign metric per stream
 func GetJellySessions(jellyfinAddress, jellyfinApiKey string) (jellysessions []SessionData, err error) {
+
 	sessions, err := GetJellyData(jellyfinAddress, jellyfinApiKey)
 	if err != nil {
 		return nil, err

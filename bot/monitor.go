@@ -16,7 +16,7 @@ type ActiveSession struct {
 	StartTime time.Time
 }
 
-func MonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
+func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
 	var msg tgbotapi.MessageConfig
 	var activeStreams []ActiveSession
 	var msgStr string
@@ -90,10 +90,10 @@ func MonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
 						}
 					}
 					if count == len(filteredJellyJSON) {
-						tmpActiveStreams = RemoveActiveSession(data.MediaID, activeStreams)
+						tmpActiveStreams = removeInactiveSession(data.MediaID, activeStreams)
 						fmt.Printf("Deregistered finished stream: %s (%s) - %s after %.0f minutes\n", data.UserName, data.MediaName, data.MediaID, math.Round(time.Since(data.StartTime).Seconds())/60)
 						additive := fmt.Sprintf("User %s was playing %s for %.0f minutes - finished.", data.UserName, data.MediaName, math.Round(time.Since(data.StartTime).Seconds())/60)
-						msgStr = AppendMessage(msgStr, additive)
+						msgStr = appendMessage(msgStr, additive)
 					}
 				}
 				activeStreams = tmpActiveStreams

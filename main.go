@@ -1,30 +1,27 @@
 package main
 
 import (
-	"log"
 	"os"
 	"telegramatorr/bot"
 )
 
 // Config struct holds all the environment variables
-var env = map[string]string{
-	"jellyfinAddress": os.Getenv("JELLYFIN_ADDRESS"),
-	"jellyfinAPIKey":  os.Getenv("JELLYFIN_APIKEY"),
-	"plexAddress":     os.Getenv("PLEX_ADDRESS"),
-	"plexAPIKey":      os.Getenv("PLEX_APIKEY"),
-	"telegramAPIKey":  os.Getenv("TELEGRAM_APIKEY"),
-	"telegramChatID":  os.Getenv("TELEGRAM_CHATID"),
-}
-
-func CheckConfig() {
-	for key, val := range env {
-		if val == "" {
-			log.Printf("%s variable not provided, disabling related features...", key)
-		}
-	}
-}
+var (
+	jellyfinAddress string = os.Getenv("JELLYFIN_ADDRESS")
+	jellyfinApiKey  string = os.Getenv("JELLYFIN_APIKEY")
+	plexAddress     string = os.Getenv("PLEX_ADDRESS")
+	plexApiKey      string = os.Getenv("PLEX_APIKEY")
+	telegramApiKey  string = os.Getenv("TELEGRAM_APIKEY")
+	telegramChatId  string = os.Getenv("TELEGRAM_CHATID")
+)
 
 func main() {
-	CheckConfig()
-	bot.Init(env)
+	bot.Init(
+		jellyfinAddress,
+		jellyfinApiKey,
+		plexAddress,
+		plexApiKey,
+		telegramApiKey,
+		telegramChatId,
+	)
 }
