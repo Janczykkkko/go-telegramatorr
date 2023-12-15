@@ -2,6 +2,7 @@ package gatherers
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -9,25 +10,10 @@ func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey 
 
 	response := []string{"Here's a report from your player(s):\n"}
 
-	var jellySessions []SessionData
-	if jellyfinAddress != "" || jellyfinApiKey != "" {
-		sessions, err := GetJellySessions(jellyfinAddress, jellyfinApiKey)
-		if err != nil {
-			response = append(response, fmt.Sprintf("Error getting Jellyfin sessions: %s", err))
-		}
-		jellySessions = sessions
+	sessions, errors := GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
+	if errors != "" {
+		return errors
 	}
-
-	var plexSessions []SessionData
-	if plexAddress != "" || plexApiKey != "" {
-		sessions, err := GetPlexSessions(plexAddress, plexApiKey)
-		if err != nil {
-			response = append(response, fmt.Sprintf("Error getting Plex sessions: %s", err))
-		}
-		plexSessions = sessions
-	}
-
-	sessions := append(plexSessions, jellySessions...)
 
 	if len(sessions) == 0 {
 		return "Nothing is playing."
@@ -45,6 +31,32 @@ func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey 
 			session.SubStream,
 		))
 	}
-
 	return strings.Join(response, "\n")
+}
+
+func GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) (allSessions []SessionData, errors string) {
+
+	var jellySessions []SessionData
+	if jellyfinAddress != "" || jellyfinApiKey != "" {
+		sessions, err := GetJellySessions(jellyfinAddress, jellyfinApiKey)
+		if err != nil {
+			errors = fmt.Sprintf("Error getting Jellyfin sessions: %s", err)
+			log.Printf("Error getting Jellyfin sessions: %s", err)
+		}
+		jellySessions = sessions
+	}
+
+	var plexSessions []SessionData
+	if plexAddress != "" || plexApiKey != "" {
+		sessions, err := GetPlexSessions(plexAddress, plexApiKey)
+		if err != nil {
+			errors = errors + "\n" + fmt.Sprintf("Error getting Plex sessions: %s", err)
+			log.Printf("Error getting Plex sessions: %s", err)
+		}
+		plexSessions = sessions
+	}
+
+	allSessions = append(jellySessions, plexSessions...)
+
+	return allSessions, errors
 }

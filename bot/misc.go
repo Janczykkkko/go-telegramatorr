@@ -14,25 +14,6 @@ func generateHelpText() string {
 	return helpText
 }
 
-func removeInactiveSession(ID string, activeStreams []ActiveSession) []ActiveSession {
-	var tmpActiveStreams []ActiveSession
-	for i, session := range activeStreams {
-		if session.MediaID == ID {
-			tmpActiveStreams = append(activeStreams[:i], activeStreams[i+1:]...)
-		}
-	}
-	return tmpActiveStreams
-}
-
-func appendMessage(msg string, additive string) string {
-	if msg != "" {
-		msg += "\n" + additive
-	} else {
-		msg = additive
-	}
-	return msg
-}
-
 func checkAssignEnv(JellyfinAddress, JellyfinApiKey, PlexAddress, PlexApiKey, TelegramChatId string) (monitor bool, chatID int64) {
 	//glorified printer
 	sources := 2
