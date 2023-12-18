@@ -5,7 +5,6 @@ import (
 	"telegramatorr/bot"
 )
 
-// Config struct holds all the environment variables
 var (
 	jellyfinAddress string = os.Getenv("JELLYFIN_ADDRESS")
 	jellyfinApiKey  string = os.Getenv("JELLYFIN_APIKEY")
@@ -16,6 +15,7 @@ var (
 )
 
 func main() {
+	//init bot and its services
 	bot.Init(
 		jellyfinAddress,
 		jellyfinApiKey,

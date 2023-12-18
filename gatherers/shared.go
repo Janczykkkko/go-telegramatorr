@@ -2,23 +2,18 @@ package gatherers
 
 import (
 	"fmt"
-	"log"
 	"strings"
 )
 
 func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) string {
-
 	response := []string{"Here's a report from your player(s):\n"}
-
 	sessions, errors := GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
 	if errors != "" {
 		return errors
 	}
-
 	if len(sessions) == 0 {
 		return "Nothing is playing."
 	}
-
 	for _, session := range sessions {
 		response = append(response, fmt.Sprintf(
 			"%s is playing(%s) on %s: %s\nBitrate: %s Mbps\nDevice: %s\nSubs: %s",
@@ -41,7 +36,6 @@ func GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey str
 		sessions, err := GetJellySessions(jellyfinAddress, jellyfinApiKey)
 		if err != nil {
 			errors = fmt.Sprintf("Error getting Jellyfin sessions: %s", err)
-			log.Printf("Error getting Jellyfin sessions: %s", err)
 		}
 		jellySessions = sessions
 	}
@@ -51,7 +45,6 @@ func GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey str
 		sessions, err := GetPlexSessions(plexAddress, plexApiKey)
 		if err != nil {
 			errors = errors + "\n" + fmt.Sprintf("Error getting Plex sessions: %s", err)
-			log.Printf("Error getting Plex sessions: %s", err)
 		}
 		plexSessions = sessions
 	}
