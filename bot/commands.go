@@ -1,4 +1,8 @@
-package main
+package bot
+
+import (
+	"telegramatorr/gatherers"
+)
 
 type CommandFunc func() string
 
@@ -7,7 +11,6 @@ var CommandMap = map[string]CommandFunc{
 		return "Hi!"
 	},
 	"jellystatus": func() string {
-
-		return GetSessionsStr()
+		return gatherers.GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
 	},
 }
