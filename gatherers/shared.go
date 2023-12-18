@@ -6,7 +6,7 @@ import (
 )
 
 func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) string {
-	response := []string{"Here's a report from your player(s):\n"}
+	response := []string{"Here's a report from your player(s):"}
 	sessions, errors := GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
 	if errors != "" {
 		return errors
@@ -26,7 +26,7 @@ func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey 
 			session.SubStream,
 		))
 	}
-	return strings.Join(response, "\n")
+	return strings.Join(response, "\n\n")
 }
 
 func GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) (allSessions []SessionData, errors string) {

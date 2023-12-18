@@ -31,11 +31,9 @@ func botObey(update tgbotapi.Update) (msg tgbotapi.MessageConfig) {
 	msg = tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know that command")
 	command := update.Message.Command()
 	reply, found := CommandMap[command]
-
 	if found {
 		replyStr := reply()
 		msg = tgbotapi.NewMessage(update.Message.Chat.ID, replyStr)
 	}
-
 	return msg
 }

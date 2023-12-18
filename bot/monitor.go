@@ -95,7 +95,7 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 			}
 			count++
 		}
-		if count == len(sessionStore) {
+		if count == len(currentSessions) {
 			removeSession(s.ID)
 			log.Printf("Deregistered finished stream: %s - %s on %s after %.0f minutes\n", s.UserName, s.Name, s.Service, math.Round(time.Since(s.StartTime).Seconds())/60)
 			msgStr := fmt.Sprintf(
