@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
+
+	gatherers "github.com/Janczykkkko/jellyplexgatherer"
 )
 
 func generateHelpText() string {
@@ -39,4 +42,28 @@ func checkAssignEnv(JellyfinAddress, JellyfinApiKey, PlexAddress, PlexApiKey, Te
 		log.Fatalln("No sources enabled! Nothing will work bruh...")
 	}
 	return monitor, chatID
+}
+
+func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) string {
+	response := []string{"Here's a report from your player(s):"}
+	sessions, errors := gatherers.GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
+	if errors != "" {
+		return errors
+	}
+	if len(sessions) == 0 {
+		return "Nothing is playing."
+	}
+	for _, session := range sessions {
+		response = append(response, fmt.Sprintf(
+			"%s is playing(%s) on %s: %s\nBitrate: %s Mbps\nDevice: %s\nSubs: %s",
+			session.UserName,
+			session.PlayMethod,
+			session.Service,
+			session.Name,
+			session.Bitrate,
+			session.DeviceName,
+			session.SubStream,
+		))
+	}
+	return strings.Join(response, "\n\n")
 }

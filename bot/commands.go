@@ -1,16 +1,12 @@
 package bot
 
-import (
-	"telegramatorr/gatherers"
-)
-
 type CommandFunc func() string
 
 var CommandMap = map[string]CommandFunc{
 	"sayhi": func() string {
 		return "Hi!"
 	},
-	"jellystatus": func() string {
-		return gatherers.GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
+	"playstatus": func() string {
+		return GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
 	},
 }
