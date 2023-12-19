@@ -10,9 +10,9 @@ import (
 )
 
 func generateHelpText() string {
-	helpText := "I understand: "
+	helpText := "I understand:\n"
 	for key := range CommandMap {
-		helpText += fmt.Sprintf("/%s ", key)
+		helpText += fmt.Sprintf("/%s\n", key)
 	}
 	return helpText
 }
