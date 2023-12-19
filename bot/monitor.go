@@ -29,7 +29,6 @@ var sessionStore []ActiveSession
 func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
-
 	for range ticker.C {
 		sessions, errors := gatherers.GetAllSessions(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey)
 		if errors != "" {
@@ -110,6 +109,7 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 				s.Bitrate,
 				s.SubStream)
 			msg := tgbotapi.NewMessage(chatID, msgStr)
+			msg.DisableNotification = true
 			if _, err := bot.Send(msg); err != nil {
 				log.Printf("Error sending message: %s", err)
 			}
