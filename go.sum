@@ -1,5 +1,7 @@
 github.com/Janczykkkko/jellyplexgatherer v1.0.0 h1:gXv24lAflZzEsYv+XucHALIZTXHfpCj6SXT4pff3LJo=
 github.com/Janczykkkko/jellyplexgatherer v1.0.0/go.mod h1:3j7mxkOpT396BG8NbMrPWrNUcu9/JLInKmCcDZLkVY4=
+github.com/Janczykkkko/jellyplexgatherer v1.0.1 h1:uNMh5uh1UUFQycGckZPnn3HJzhUENrEmeFZEbRKbLzs=
+github.com/Janczykkkko/jellyplexgatherer v1.0.1/go.mod h1:3j7mxkOpT396BG8NbMrPWrNUcu9/JLInKmCcDZLkVY4=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 h1:wG8n/XJQ07TmjbITcGiUaOtXxdrINDz1b0J1w0SzqDc=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1/go.mod h1:A2S0CWkNylc2phvKXWBBdD3K0iGnDBGbzRpISP2zBl8=
 github.com/rs/xid v1.5.0 h1:mKX4bl4iPYJtEIxp6CYiUuLQ/8DYMoz0PUdtGgMFRVc=
