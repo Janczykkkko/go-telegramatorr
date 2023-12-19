@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"telegramatorr/gatherers"
 	"time"
+
+	gatherers "github.com/Janczykkkko/jellyplexgatherer"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/xid"
@@ -26,7 +27,7 @@ type ActiveSession struct {
 var sessionStore []ActiveSession
 
 func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {

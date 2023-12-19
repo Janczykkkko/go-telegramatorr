@@ -11,7 +11,6 @@ var (
 	jellyfinApiKey  string
 	plexAddress     string
 	plexApiKey      string
-	telegramChatId  string
 )
 
 func Init(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey, telegramApiKey, telegramChatId string) {
