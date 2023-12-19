@@ -27,7 +27,7 @@ type ActiveSession struct {
 var sessionStore []ActiveSession
 
 func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
