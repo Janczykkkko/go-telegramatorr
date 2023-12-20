@@ -5,23 +5,14 @@ import (
 	"telegramatorr/bot"
 )
 
-var (
-	jellyfinAddress string = os.Getenv("JELLYFIN_ADDRESS")
-	jellyfinApiKey  string = os.Getenv("JELLYFIN_APIKEY")
-	plexAddress     string = os.Getenv("PLEX_ADDRESS")
-	plexApiKey      string = os.Getenv("PLEX_APIKEY")
-	telegramApiKey  string = os.Getenv("TELEGRAM_APIKEY")
-	telegramChatId  string = os.Getenv("TELEGRAM_CHATID")
-)
-
 func main() {
 	//init bot and its services
 	bot.Init(
-		jellyfinAddress,
-		jellyfinApiKey,
-		plexAddress,
-		plexApiKey,
-		telegramApiKey,
-		telegramChatId,
+		os.Getenv("JELLYFIN_ADDRESS"),
+		os.Getenv("JELLYFIN_APIKEY"),
+		os.Getenv("PLEX_ADDRESS"),
+		os.Getenv("PLEX_APIKEY"),
+		os.Getenv("TELEGRAM_APIKEY"),
+		os.Getenv("TELEGRAM_CHATID"),
 	)
 }
