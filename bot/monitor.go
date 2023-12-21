@@ -64,8 +64,11 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 			if c.UserName == s.UserName &&
 				c.Name == s.Name &&
 				c.DeviceName == s.DeviceName {
-				s.SubStream = c.SubStream //update substream if changed
-				break                     //found monitored session in currently active streams
+				//update if changed
+				s.SubStream = c.SubStream
+				s.Bitrate = c.Bitrate
+				s.PlayMethod = c.PlayMethod
+				break //found monitored session in currently active streams
 			}
 			count++
 		}
