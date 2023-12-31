@@ -4,15 +4,12 @@ import (
 	"database/sql"
 	"log"
 	"os"
-	"strconv"
 	"time"
 )
 
 type SessionsByUser []struct {
 	UserName string
-	Sessions []struct {
-		ActiveSession
-	}
+	Sessions []ActiveSession
 }
 
 func DbExistsAndWorks(dblocation string) bool {
@@ -147,7 +144,7 @@ func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string)
 	return nil
 }
 
-func GetSessionDataFromDB(dblocation string) ([]ActiveSession, error) {
+func GetSessionsByUserFromDB(dblocation string) (SessionsByUser, error) {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
 		return nil, err
@@ -156,8 +153,9 @@ func GetSessionDataFromDB(dblocation string) ([]ActiveSession, error) {
 
 	query := `
 		SELECT user_name, item_name, playback_method, service_name,
-			device_name, substream, bitrate, started_at, duration_minutes, ended_at, stream_id
+			device_name, substream, bitrate, started_at, ended_at, stream_id
 		FROM streams
+		ORDER BY user_name
 	`
 
 	rows, err := db.Query(query)
@@ -166,35 +164,51 @@ func GetSessionDataFromDB(dblocation string) ([]ActiveSession, error) {
 	}
 	defer rows.Close()
 
-	var sessions []ActiveSession
+	sessionsByUser := make(SessionsByUser, 0)
 
 	for rows.Next() {
 		var session ActiveSession
-		var startedAtStr, endedAtStr string
-		var durationMinutes int
-
 		err := rows.Scan(
-			&session.UserName, &session.Name, &session.PlayMethod,
-			&session.Service, &session.DeviceName, &session.SubStream,
-			&session.Bitrate, &startedAtStr, &durationMinutes, &endedAtStr, &session.ID,
+			&session.UserName,
+			&session.Name,
+			&session.PlayMethod,
+			&session.Service,
+			&session.DeviceName,
+			&session.SubStream,
+			&session.Bitrate,
+			&session.StartTime,
+			&session.Duration,
+			&session.ID,
 		)
 		if err != nil {
-			return nil, err
+			log.Println(err)
+			continue
 		}
 
-		session.StartTime, err = time.Parse(time.RFC3339, startedAtStr)
-		if err != nil {
-			return nil, err
+		userIndex := -1
+		for i := range sessionsByUser {
+			if sessionsByUser[i].UserName == session.UserName {
+				userIndex = i
+				break
+			}
 		}
 
-		session.Duration = strconv.Itoa(durationMinutes)
-
-		sessions = append(sessions, session)
+		if userIndex == -1 {
+			sessionsByUser = append(sessionsByUser, struct {
+				UserName string
+				Sessions []ActiveSession
+			}{
+				UserName: session.UserName,
+				Sessions: []ActiveSession{session},
+			})
+		} else {
+			sessionsByUser[userIndex].Sessions = append(sessionsByUser[userIndex].Sessions, session)
+		}
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return sessions, nil
+	return sessionsByUser, nil
 }

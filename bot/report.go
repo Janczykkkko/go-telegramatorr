@@ -31,9 +31,17 @@ func GetReport(dblocation string) (string, error) {
 }
 
 func dailyReport(dblocation string) (string, error) {
-
+	sessions, err := GetSessionsByUserFromDB(dblocation)
+	if err != nil {
+		log.Println("Error getting sessions for db", err)
+		return "", err
+	}
 }
 
 func weeklyReport(dblocation string) (string, error) {
-
+	sessions, err := GetSessionsByUserFromDB(dblocation)
+	if err != nil {
+		log.Println("Error getting sessions for db", err)
+		return "", err
+	}
 }
