@@ -25,9 +25,20 @@ type ActiveSession struct {
 	ID         string
 }
 
-var sessionStore []ActiveSession
+var (
+	sessionStore []ActiveSession
+	dblocation        = "./sessions.db"
+	persist      bool = true
+)
 
 func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
+	if !DbExistsAndWorks(dblocation) {
+		err := CreateDb(dblocation)
+		if err != nil {
+			log.Printf("Failed to create db, disabling reporting: %s", err)
+			persist = false
+		}
+	}
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 	for range ticker.C {
@@ -101,6 +112,13 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 			count++
 		}
 		if count == len(currentSessions) {
+			//session ended, persist in db for reporting
+			if persist {
+				err := InsertDataToDb(s, time.Now(), dblocation)
+				if err != nil {
+					log.Println("Error persisting session in db", err)
+				}
+			}
 			removeSession(s.ID)
 			log.Printf("Deregistered finished stream: %s - %s on %s after %.0f minutes\n", s.UserName, s.Name, s.Service, math.Round(time.Since(s.StartTime).Seconds())/60)
 			msgStr := fmt.Sprintf(
@@ -126,6 +144,23 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 				s.Service,
 				math.Round(time.Since(s.StartTime).Seconds())/60)
 			removeSession(s.ID)
+		}
+	}
+	//perform db and reporting tasks
+	if persist {
+		if MaintainDb(dblocation) != nil {
+			persist = false
+		}
+		//check if should report & report
+		if TimeToReport() {
+			report, err := GetReport(dblocation)
+			if err == nil {
+				msg := tgbotapi.NewMessage(chatID, report)
+				msg.DisableNotification = true
+				if _, err := bot.Send(msg); err != nil {
+					log.Printf("Error sending report: %s", err)
+				}
+			}
 		}
 	}
 }

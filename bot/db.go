@@ -1,23 +1,49 @@
-package db
+package bot
 
 import (
 	"database/sql"
 	"log"
 	"os"
 	"strconv"
-	"telegramatorr/bot"
 	"time"
 )
 
-func checkDb(dblocation string) (exists bool) {
-	if _, err := os.Stat(dblocation); os.IsNotExist(err) {
-		return false
-	} else {
-		return true
+type SessionsByUser []struct {
+	UserName string
+	Sessions []struct {
+		ActiveSession
 	}
 }
 
-func createDb(dblocation string) error {
+func DbExistsAndWorks(dblocation string) bool {
+	if _, err := os.Stat(dblocation); os.IsNotExist(err) {
+		return false
+	}
+
+	db, err := sql.Open("sqlite3", dblocation)
+	if err != nil {
+		log.Println("Error opening database:", err)
+		return false
+	}
+	defer db.Close()
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)")
+	if err != nil {
+		log.Println("Error creating test table:", err)
+		return false
+	}
+
+	defer func() {
+		_, err := db.Exec("DROP TABLE IF EXISTS test")
+		if err != nil {
+			log.Println("Error dropping test table:", err)
+		}
+	}()
+
+	return true
+}
+
+func CreateDb(dblocation string) error {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
 		return err
@@ -47,17 +73,41 @@ func createDb(dblocation string) error {
 	return nil
 }
 
-func cleanDB(dblocation string) error {
+func CleanDB(dblocation string) error {
 	log.Println("Performing scheduled db clean after a week...")
 	err := os.Remove(dblocation)
 	if err != nil {
+		log.Printf("Failed to remove db: %s", err)
 		return err
 	}
 	log.Printf("Database file %s deleted successfully", dblocation)
+	err = CreateDb(dblocation)
+	if err != nil {
+		log.Printf("Failed to create db: %s", err)
+		return err
+	}
 	return nil
 }
 
-func getDBCreationTime(dblocation string) (time.Time, error) {
+func MaintainDb(dblocation string) error {
+	//check db age and delete if > 7 days
+	creationTime, err := GetDBCreationTime(dblocation)
+	if err != nil {
+		log.Println("Error determining db age:", err, "\nDisabling reporting, restart to reenable..")
+		return err
+	}
+	sevenDaysAgo := time.Now().AddDate(0, 0, -7) // Seven days ago from now
+	if creationTime.Before(sevenDaysAgo) {
+		err := CleanDB(dblocation)
+		if err != nil {
+			log.Println("Error cleaning the db, disabling reporting: ", err, "\nDisabling reporting, restart to reenable..")
+			return err
+		}
+	}
+	return nil
+}
+
+func GetDBCreationTime(dblocation string) (time.Time, error) {
 	fileInfo, err := os.Stat(dblocation)
 	if err != nil {
 		return time.Time{}, err
@@ -66,7 +116,7 @@ func getDBCreationTime(dblocation string) (time.Time, error) {
 	return creationTime, nil
 }
 
-func insertDataToDb(session bot.ActiveSession, endTime time.Time, dblocation string) error {
+func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string) error {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
 		return err
@@ -97,7 +147,7 @@ func insertDataToDb(session bot.ActiveSession, endTime time.Time, dblocation str
 	return nil
 }
 
-func getSessionDataFromDB(dblocation string) ([]bot.ActiveSession, error) {
+func GetSessionDataFromDB(dblocation string) ([]ActiveSession, error) {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
 		return nil, err
@@ -116,10 +166,10 @@ func getSessionDataFromDB(dblocation string) ([]bot.ActiveSession, error) {
 	}
 	defer rows.Close()
 
-	var sessions []bot.ActiveSession
+	var sessions []ActiveSession
 
 	for rows.Next() {
-		var session bot.ActiveSession
+		var session ActiveSession
 		var startedAtStr, endedAtStr string
 		var durationMinutes int
 
