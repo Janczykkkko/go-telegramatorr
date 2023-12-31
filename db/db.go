@@ -18,7 +18,6 @@ func checkDb(dblocation string) (exists bool) {
 }
 
 func createDb(dblocation string) error {
-	// Create a new database file
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
 		return err
@@ -46,6 +45,25 @@ func createDb(dblocation string) error {
 
 	log.Println("Database created successfully")
 	return nil
+}
+
+func cleanDB(dblocation string) error {
+	log.Println("Performing scheduled db clean after a week...")
+	err := os.Remove(dblocation)
+	if err != nil {
+		return err
+	}
+	log.Printf("Database file %s deleted successfully", dblocation)
+	return nil
+}
+
+func getDBCreationTime(dblocation string) (time.Time, error) {
+	fileInfo, err := os.Stat(dblocation)
+	if err != nil {
+		return time.Time{}, err
+	}
+	creationTime := fileInfo.ModTime()
+	return creationTime, nil
 }
 
 func insertDataToDb(session bot.ActiveSession, endTime time.Time, dblocation string) error {
