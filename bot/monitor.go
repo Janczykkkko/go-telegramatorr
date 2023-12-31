@@ -21,6 +21,7 @@ type ActiveSession struct {
 	DeviceName string
 	Service    string
 	StartTime  time.Time
+	Duration   string
 	ID         string
 }
 
