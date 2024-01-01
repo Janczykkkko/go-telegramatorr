@@ -30,11 +30,10 @@ type ActiveSession struct {
 
 var (
 	sessionStore []ActiveSession
-	dblocation   string = "./sessions.db"
-	persist      bool   = true
+	persist      bool = true
 )
 
-func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
+func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64, dblocation string) {
 	if !DbExistsAndWorks(dblocation) {
 		err := CreateDb(dblocation)
 		if err != nil {
@@ -162,21 +161,4 @@ func removeSession(ID string) {
 		}
 	}
 	sessionStore = tmpActiveStreams
-}
-
-func processReports(chatID int64, bot *tgbotapi.BotAPI) {
-	if MaintainDb(dblocation) != nil {
-		persist = false
-	}
-	//check if should report & report
-	if TimeToReport() {
-		report, err := GetReport(dblocation)
-		if err == nil {
-			msg := tgbotapi.NewMessage(chatID, report)
-			msg.DisableNotification = true
-			if _, err := bot.Send(msg); err != nil {
-				log.Printf("Error sending report: %s", err)
-			}
-		}
-	}
 }

@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type SessionsByUser []struct {
@@ -89,33 +91,6 @@ func CleanDB(dblocation string) error {
 	return nil
 }
 
-func MaintainDb(dblocation string) error {
-	//check db age and delete if > 7 days
-	creationTime, err := GetDBCreationTime(dblocation)
-	if err != nil {
-		log.Println("Error determining db age:", err, "\nDisabling reporting, restart to reenable..")
-		return err
-	}
-	sevenDaysAgo := time.Now().AddDate(0, 0, -7) // Seven days ago from now
-	if creationTime.Before(sevenDaysAgo) {
-		err := CleanDB(dblocation)
-		if err != nil {
-			log.Println("Error cleaning the db, disabling reporting: ", err, "\nDisabling reporting, restart to reenable..")
-			return err
-		}
-	}
-	return nil
-}
-
-func GetDBCreationTime(dblocation string) (time.Time, error) {
-	fileInfo, err := os.Stat(dblocation)
-	if err != nil {
-		return time.Time{}, err
-	}
-	creationTime := fileInfo.ModTime()
-	return creationTime, nil
-}
-
 func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string) error {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
@@ -150,6 +125,7 @@ func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string)
 func GetSessionsByUserFromDB(dblocation string, timeframe int) (SessionsByUser, error) {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
+		log.Println("Error accessing db", err)
 		return nil, err
 	}
 	defer db.Close()
@@ -167,6 +143,7 @@ func GetSessionsByUserFromDB(dblocation string, timeframe int) (SessionsByUser, 
 
 	rows, err := db.Query(query, timeFrame.Format("2006-01-02T15:04:05-07:00"))
 	if err != nil {
+		log.Println("Error querying db", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -189,7 +166,7 @@ func GetSessionsByUserFromDB(dblocation string, timeframe int) (SessionsByUser, 
 			&session.ID,
 		)
 		if err != nil {
-			log.Println(err)
+			log.Println("Error processing data from db", err)
 			continue
 		}
 
@@ -232,6 +209,7 @@ func GetSessionsByUserFromDB(dblocation string, timeframe int) (SessionsByUser, 
 	}
 
 	if err := rows.Err(); err != nil {
+		log.Println("Error preparing data (scanning) from db", err)
 		return nil, err
 	}
 

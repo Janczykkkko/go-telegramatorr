@@ -14,5 +14,6 @@ func main() {
 		os.Getenv("PLEX_APIKEY"),
 		os.Getenv("TELEGRAM_APIKEY"),
 		os.Getenv("TELEGRAM_CHATID"),
+		os.Getenv("ENABLE_REPORTS"),
 	)
 }

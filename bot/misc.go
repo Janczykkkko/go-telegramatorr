@@ -18,7 +18,7 @@ func generateHelpText() string {
 	return helpText
 }
 
-func checkAssignEnv(JellyfinAddress, JellyfinApiKey, PlexAddress, PlexApiKey, TelegramChatId string) (monitor bool, chatID int64) {
+func checkAssignEnv(JellyfinAddress, JellyfinApiKey, PlexAddress, PlexApiKey, TelegramChatId, enableReport string) (monitor bool, chatID int64, reports bool) {
 	//glorified printer
 	sources := 2
 	monitor = true
@@ -42,7 +42,15 @@ func checkAssignEnv(JellyfinAddress, JellyfinApiKey, PlexAddress, PlexApiKey, Te
 	if sources == 0 {
 		log.Fatalln("No sources enabled! Nothing will work bruh...")
 	}
-	return monitor, chatID
+
+	reportBool, err := strconv.ParseBool(enableReport)
+	if err != nil {
+		fmt.Println("Reports variable not assigned or wrong format, disabling...", err)
+		reports = false
+	}
+	reports = reportBool
+
+	return monitor, chatID, reports
 }
 
 func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey string) string {
