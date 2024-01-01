@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -155,7 +156,7 @@ func GetSessionsByUserFromDB(dblocation string) (SessionsByUser, error) {
 
 	query := `
 		SELECT user_name, item_name, playback_method, service_name,
-			device_name, substream, bitrate, started_at, ended_at, stream_id
+			device_name, substream, bitrate, started_at, ended_at, duration_minutes, stream_id
 		FROM streams
 		ORDER BY user_name
 	`
@@ -178,7 +179,8 @@ func GetSessionsByUserFromDB(dblocation string) (SessionsByUser, error) {
 			&session.DeviceName,
 			&session.SubStream,
 			&session.Bitrate,
-			&session.StartTime,
+			&session.StartTimeStr,
+			&session.EndTimeStr,
 			&session.Duration,
 			&session.ID,
 		)
@@ -186,6 +188,17 @@ func GetSessionsByUserFromDB(dblocation string) (SessionsByUser, error) {
 			log.Println(err)
 			continue
 		}
+
+		startTime, err := time.Parse("2006-01-02T15:04:05-07:00", session.StartTimeStr)
+		if err != nil {
+			log.Println("Error retireiving (parsing) time from db", err)
+		}
+		session.StartTime = startTime
+		endTime, err := time.Parse("2006-01-02T15:04:05-07:00", session.EndTimeStr)
+		if err != nil {
+			log.Println("Error retireiving (parsing) time from db", err)
+		}
+		session.EndTime = endTime
 
 		userIndex := -1
 		for i := range sessionsByUser {
@@ -206,6 +219,12 @@ func GetSessionsByUserFromDB(dblocation string) (SessionsByUser, error) {
 		} else {
 			sessionsByUser[userIndex].Sessions = append(sessionsByUser[userIndex].Sessions, session)
 		}
+	}
+
+	for i := range sessionsByUser {
+		sort.SliceStable(sessionsByUser[i].Sessions, func(j, k int) bool {
+			return sessionsByUser[i].Sessions[j].EndTime.Before(sessionsByUser[i].Sessions[k].EndTime)
+		})
 	}
 
 	if err := rows.Err(); err != nil {

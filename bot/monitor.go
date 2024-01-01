@@ -13,22 +13,25 @@ import (
 )
 
 type ActiveSession struct {
-	UserName   string
-	Name       string
-	Bitrate    string
-	PlayMethod string
-	SubStream  string
-	DeviceName string
-	Service    string
-	StartTime  time.Time
-	Duration   string
-	ID         string
+	UserName     string
+	Name         string
+	Bitrate      string
+	PlayMethod   string
+	SubStream    string
+	DeviceName   string
+	Service      string
+	StartTime    time.Time
+	EndTime      time.Time //used by db
+	EndTimeStr   string    //used by db
+	StartTimeStr string    //used by db
+	Duration     string    //used by db
+	ID           string
 }
 
 var (
 	sessionStore []ActiveSession
-	dblocation        = "./sessions.db"
-	persist      bool = true
+	dblocation   string = "./sessions.db"
+	persist      bool   = true
 )
 
 func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
@@ -64,6 +67,9 @@ func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
 			}
 		} else {
 			fmt.Println("No sessions are monitored.")
+		}
+		if persist {
+			processReports(chatID, bot)
 		}
 	}
 }
@@ -146,23 +152,6 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 			removeSession(s.ID)
 		}
 	}
-	//perform db and reporting tasks
-	if persist {
-		if MaintainDb(dblocation) != nil {
-			persist = false
-		}
-		//check if should report & report
-		if TimeToReport() {
-			report, err := GetReport(dblocation)
-			if err == nil {
-				msg := tgbotapi.NewMessage(chatID, report)
-				msg.DisableNotification = true
-				if _, err := bot.Send(msg); err != nil {
-					log.Printf("Error sending report: %s", err)
-				}
-			}
-		}
-	}
 }
 
 func removeSession(ID string) {
@@ -173,4 +162,21 @@ func removeSession(ID string) {
 		}
 	}
 	sessionStore = tmpActiveStreams
+}
+
+func processReports(chatID int64, bot *tgbotapi.BotAPI) {
+	if MaintainDb(dblocation) != nil {
+		persist = false
+	}
+	//check if should report & report
+	if TimeToReport() {
+		report, err := GetReport(dblocation)
+		if err == nil {
+			msg := tgbotapi.NewMessage(chatID, report)
+			msg.DisableNotification = true
+			if _, err := bot.Send(msg); err != nil {
+				log.Printf("Error sending report: %s", err)
+			}
+		}
+	}
 }

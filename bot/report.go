@@ -14,7 +14,7 @@ func TimeToReport() bool {
 }
 
 func GetReport(dblocation string) (string, error) {
-	if time.Now().Weekday() == time.Sunday {
+	/*if time.Now().Weekday() == time.Sunday {
 		report, err := weeklyReport(dblocation)
 		if err != nil {
 			log.Println("Error generating report", err)
@@ -26,7 +26,8 @@ func GetReport(dblocation string) (string, error) {
 	if err != nil {
 		log.Println("Error generating report", err)
 		return "", err
-	}
+	}*/
+
 	return report, nil
 }
 
