@@ -53,7 +53,7 @@ func CreateDb(dblocation string) error {
 
 	createTableSQL := `
 		CREATE TABLE IF NOT EXISTS streams (
-			user_name TEXT PRIMARY KEY,
+			user_name TEXT,
 			item_name INTEGER,
 			playback_method TEXT,
 			service_name TEXT,
@@ -62,7 +62,7 @@ func CreateDb(dblocation string) error {
 			bitrate TEXT,
 			started_at TEXT,
 			ended_at TEXT,
-			stream_id TEXT,
+			stream_id TEXT PRIMARY KEY,
 			duration_minutes TEXT
 		);
 	`
