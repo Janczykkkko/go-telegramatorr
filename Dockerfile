@@ -8,6 +8,7 @@ RUN go mod download
 
 RUN go get github.com/mattn/go-sqlite3
 ENV CGO_ENABLED=1
+RUN apk add --no-cache build-base sqlite-dev
 
 RUN go build .
 
