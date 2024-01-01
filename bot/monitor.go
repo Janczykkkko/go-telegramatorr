@@ -67,9 +67,6 @@ func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64, dblocation string) 
 		} else {
 			fmt.Println("No sessions are monitored.")
 		}
-		if persist {
-			processReports(chatID, bot)
-		}
 	}
 }
 
