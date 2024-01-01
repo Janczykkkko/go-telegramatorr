@@ -1,7 +1,9 @@
 package bot
 
 import (
+	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -13,36 +15,39 @@ func TimeToReport() bool {
 	return false
 }
 
-func GetReport(dblocation string) (string, error) {
-	/*if time.Now().Weekday() == time.Sunday {
-		report, err := weeklyReport(dblocation)
-		if err != nil {
-			log.Println("Error generating report", err)
-			return "", err
+func GenerateReport(dblocation string) (string, error) {
+	reportTime := 24 //default daily
+	showDays := false
+	var report strings.Builder
+	if time.Now().Weekday() == time.Sunday {
+		reportTime = 168 //weekly
+	}
+	sessiondata, err := GetSessionsByUserFromDB(dblocation, reportTime)
+	if err != nil {
+		log.Println("Error getting data from db", err)
+		return "", err
+	}
+	if reportTime == 24 {
+		report.WriteString("Here's a daily report from media players:\n")
+	} else {
+		report.WriteString("Here's a weekly report from media players:\n")
+		showDays = true
+	}
+
+	for _, userSessions := range sessiondata {
+		report.WriteString(fmt.Sprintf("User: %s\n", userSessions.UserName))
+		for _, s := range userSessions.Sessions {
+			report.WriteString(fmt.Sprintf("%s - %s on %s(%s) for %s minutes\nmethod: %s\nbitrate: %s Mbps\nsubs: %s\n",
+				FormatTimeToNiceString(s.StartTime, showDays),
+				s.Name,
+				s.Service,
+				s.DeviceName,
+				s.Duration,
+				s.PlayMethod,
+				s.Bitrate,
+				s.SubStream))
 		}
-		return report, nil
+		report.WriteString("-------------\n")
 	}
-	report, err := dailyReport(dblocation)
-	if err != nil {
-		log.Println("Error generating report", err)
-		return "", err
-	}*/
-
-	return report, nil
-}
-
-func dailyReport(dblocation string) (string, error) {
-	sessions, err := GetSessionsByUserFromDB(dblocation)
-	if err != nil {
-		log.Println("Error getting sessions for db", err)
-		return "", err
-	}
-}
-
-func weeklyReport(dblocation string) (string, error) {
-	sessions, err := GetSessionsByUserFromDB(dblocation)
-	if err != nil {
-		log.Println("Error getting sessions for db", err)
-		return "", err
-	}
+	return report.String(), nil
 }

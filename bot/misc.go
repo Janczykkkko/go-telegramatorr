@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	gatherers "github.com/Janczykkkko/jellyplexgatherer"
 )
@@ -66,4 +67,13 @@ func GetAllSessionsStr(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey 
 		))
 	}
 	return strings.Join(response, "\n\n")
+}
+
+func FormatTimeToNiceString(t time.Time, showDays bool) string {
+	// Format the time to display "Mon-Sun HH:mm"
+	formattedTime := t.Format("15:04")
+	if showDays {
+		formattedTime = t.Format("Mon 15:04")
+	}
+	return formattedTime
 }

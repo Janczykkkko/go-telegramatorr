@@ -147,21 +147,25 @@ func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string)
 	return nil
 }
 
-func GetSessionsByUserFromDB(dblocation string) (SessionsByUser, error) {
+func GetSessionsByUserFromDB(dblocation string, timeframe int) (SessionsByUser, error) {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	query := `
-		SELECT user_name, item_name, playback_method, service_name,
-			device_name, substream, bitrate, started_at, ended_at, duration_minutes, stream_id
-		FROM streams
-		ORDER BY user_name
-	`
+	currentTime := time.Now()
+	timeFrame := currentTime.Add(-time.Duration(timeframe) * time.Hour)
 
-	rows, err := db.Query(query)
+	query := `
+        SELECT user_name, item_name, playback_method, service_name,
+            device_name, substream, bitrate, started_at, ended_at, duration_minutes, stream_id
+        FROM streams
+        WHERE ended_at >= ?
+        ORDER BY user_name
+    `
+
+	rows, err := db.Query(query, timeFrame.Format("2006-01-02T15:04:05-07:00"))
 	if err != nil {
 		return nil, err
 	}

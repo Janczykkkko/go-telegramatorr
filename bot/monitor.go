@@ -128,12 +128,12 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 			removeSession(s.ID)
 			log.Printf("Deregistered finished stream: %s - %s on %s after %.0f minutes\n", s.UserName, s.Name, s.Service, math.Round(time.Since(s.StartTime).Seconds())/60)
 			msgStr := fmt.Sprintf(
-				"User %s (%s) was playing %s on %s for %.0f minutes\nmethod: %s\nbitrate: %s Mbps\nsubs: %s",
+				"User %s (%s) was playing %s on %s for %s minutes\nmethod: %s\nbitrate: %s Mbps\nsubs: %s",
 				s.UserName,
 				s.DeviceName,
 				s.Name,
 				s.Service,
-				math.Round(time.Since(s.StartTime).Seconds())/60,
+				s.Duration,
 				s.PlayMethod,
 				s.Bitrate,
 				s.SubStream)
