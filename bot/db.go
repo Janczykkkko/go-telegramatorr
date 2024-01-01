@@ -2,6 +2,7 @@ package bot
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -58,7 +59,8 @@ func CreateDb(dblocation string) error {
 			bitrate TEXT,
 			started_at TEXT,
 			ended_at TEXT,
-			stream_id TEXT
+			stream_id TEXT,
+			duration_minutes TEXT
 		);
 	`
 	_, err = db.Exec(createTableSQL)
@@ -116,16 +118,16 @@ func GetDBCreationTime(dblocation string) (time.Time, error) {
 func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string) error {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
-		return err
+		return fmt.Errorf("error opening database: %v", err)
 	}
 	defer db.Close()
 
 	insertSQL := `
-		INSERT INTO streams (
-			user_name, item_name, playback_method, service_name,
-			device_name, substream, bitrate, started_at, ended_at, duration_minutes, stream_id
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`
+        INSERT INTO streams (
+            user_name, item_name, playback_method, service_name,
+            device_name, substream, bitrate, started_at, ended_at, stream_id, duration_minutes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `
 
 	startedAtStr := session.StartTime.Format(time.RFC3339)
 	endedAtStr := endTime.Format(time.RFC3339)
@@ -135,9 +137,9 @@ func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string)
 
 	_, err = db.Exec(insertSQL, session.UserName, session.Name, session.PlayMethod,
 		session.Service, session.DeviceName, session.SubStream, session.Bitrate,
-		startedAtStr, endedAtStr, durationMinutes, session.ID)
+		startedAtStr, endedAtStr, session.ID, durationMinutes)
 	if err != nil {
-		return err
+		return fmt.Errorf("error executing query: %v", err)
 	}
 
 	log.Printf("Stream %s data persisted successfully in db", session.ID)
