@@ -40,7 +40,7 @@ func botGenerateReports(chatID int64, bot *tgbotapi.BotAPI, dblocation string) {
 
 func TimeToReport() bool {
 	now := time.Now()
-	if now.Hour() == 10 && now.Minute() == 0 && now.Second() == 0 {
+	if now.Hour() == 8 && now.Minute() == 0 && now.Second() == 0 {
 		return true
 	}
 	return false
@@ -66,7 +66,7 @@ func GenerateReport(dblocation string) (string, error) {
 		report.WriteString("Here's a weekly report from media players:\n")
 		cleandb = true
 	}
-
+	report.WriteString("-------------\n")
 	for _, userSessions := range sessiondata {
 		report.WriteString(fmt.Sprintf("User: %s\n", userSessions.UserName))
 		for _, s := range userSessions.Sessions {
