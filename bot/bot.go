@@ -11,16 +11,17 @@ var (
 	jellyfinApiKey  string
 	plexAddress     string
 	plexApiKey      string
+	dblocation      string = "/data/sessions.db"
 )
 
-func Init(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey, telegramApiKey, telegramChatId string) {
+func Init(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey, telegramApiKey, telegramChatId, enableReports string) {
 
 	bot, err := tgbotapi.NewBotAPI(telegramApiKey)
 	if err != nil {
 		log.Fatal("Error connecting to bot, is the apikey correct?", err)
 	}
 
-	monitor, chatID := checkAssignEnv(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey, telegramChatId)
+	monitor, chatID, report := checkAssignEnv(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey, telegramChatId, enableReports)
 
 	bot.Debug = true
 	u := tgbotapi.NewUpdate(0)
@@ -30,7 +31,11 @@ func Init(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey, telegramApiK
 	go botWatch(u, bot)
 
 	if monitor {
-		go botMonitorAndInform(bot, chatID)
+		go botMonitorAndInform(bot, chatID, dblocation)
+	}
+
+	if report {
+		go botGenerateReports(chatID, bot, dblocation)
 	}
 
 	select {}

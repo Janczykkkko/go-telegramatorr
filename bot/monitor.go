@@ -13,20 +13,34 @@ import (
 )
 
 type ActiveSession struct {
-	UserName   string
-	Name       string
-	Bitrate    string
-	PlayMethod string
-	SubStream  string
-	DeviceName string
-	Service    string
-	StartTime  time.Time
-	ID         string
+	UserName     string
+	Name         string
+	Bitrate      string
+	PlayMethod   string
+	SubStream    string
+	DeviceName   string
+	Service      string
+	StartTime    time.Time
+	EndTime      time.Time //used by db
+	EndTimeStr   string    //used by db
+	StartTimeStr string    //used by db
+	Duration     string    //used by db
+	ID           string
 }
 
-var sessionStore []ActiveSession
+var (
+	sessionStore []ActiveSession
+	persist      bool = true
+)
 
-func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64) {
+func botMonitorAndInform(bot *tgbotapi.BotAPI, chatID int64, dblocation string) {
+	if !DbExistsAndWorks(dblocation) {
+		err := CreateDb(dblocation)
+		if err != nil {
+			log.Printf("Failed to create db, disabling reporting: %s", err)
+			persist = false
+		}
+	}
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 	for range ticker.C {
@@ -100,15 +114,22 @@ func processSessions(currentSessions []gatherers.SessionData, chatID int64, bot 
 			count++
 		}
 		if count == len(currentSessions) {
+			//session ended, persist in db for reporting
+			if persist {
+				err := InsertDataToDb(s, time.Now(), dblocation)
+				if err != nil {
+					log.Println("Error persisting session in db", err)
+				}
+			}
 			removeSession(s.ID)
 			log.Printf("Deregistered finished stream: %s - %s on %s after %.0f minutes\n", s.UserName, s.Name, s.Service, math.Round(time.Since(s.StartTime).Seconds())/60)
 			msgStr := fmt.Sprintf(
-				"User %s (%s) was playing %s on %s for %.0f minutes\nmethod: %s\nbitrate: %s Mbps\nsubs: %s",
+				"User %s (%s) was playing %s on %s for %s minutes\nmethod: %s\nbitrate: %s Mbps\nsubs: %s",
 				s.UserName,
 				s.DeviceName,
 				s.Name,
 				s.Service,
-				math.Round(time.Since(s.StartTime).Seconds())/60,
+				s.Duration,
 				s.PlayMethod,
 				s.Bitrate,
 				s.SubStream)
