@@ -92,6 +92,16 @@ func CleanDB(dblocation string) error {
 }
 
 func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string) error {
+	if !CheckAndUpdateEntry(session, endTime, dblocation) {
+		err := InsertDataToDb(session, endTime, dblocation)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func InsertNewDataToDb(session ActiveSession, endTime time.Time, dblocation string) error {
 	db, err := sql.Open("sqlite3", dblocation)
 	if err != nil {
 		return fmt.Errorf("error opening database: %v", err)
@@ -120,6 +130,68 @@ func InsertDataToDb(session ActiveSession, endTime time.Time, dblocation string)
 
 	log.Printf("Stream %s data persisted successfully in db", session.ID)
 	return nil
+}
+
+func CheckAndUpdateEntry(session ActiveSession, endTime time.Time, dblocation string) bool {
+	db, err := sql.Open("sqlite3", dblocation)
+	if err != nil {
+		log.Printf("error opening database: %v", err)
+		return false
+	}
+	defer db.Close()
+
+	checkAndUpdateSQL := `
+        SELECT ended_at, duration_minutes 
+        FROM streams 
+        WHERE user_name = ? AND item_name = ? AND ended_at >= ? 
+        ORDER BY ended_at DESC 
+        LIMIT 1
+    `
+
+	endedAtThreshold := endTime.Add(-30 * time.Minute)
+	rows, err := db.Query(checkAndUpdateSQL, session.UserName, session.Name, endedAtThreshold)
+	if err != nil {
+		log.Printf("error querying database: %v", err)
+		return false
+	}
+	defer rows.Close()
+
+	var endedAtStr string
+	var durationMinutes int
+
+	if rows.Next() {
+		if err := rows.Scan(&endedAtStr, &durationMinutes); err != nil {
+			log.Printf("error scanning rows: %v", err)
+			return false
+		}
+
+		prevEndedAt, err := time.Parse(time.RFC3339, endedAtStr)
+		if err != nil {
+			log.Printf("error parsing time: %v", err)
+			return false
+		}
+
+		// Update the found entry
+		newDuration := endTime.Sub(prevEndedAt)
+		newDurationMinutes := int(newDuration.Minutes())
+
+		updateSQL := `
+            UPDATE streams 
+            SET ended_at = ?, duration_minutes = ? 
+            WHERE user_name = ? AND item_name = ? AND ended_at = ?
+        `
+		_, err = db.Exec(updateSQL, endTime.Format(time.RFC3339), durationMinutes+newDurationMinutes,
+			session.UserName, session.Name, endedAtStr)
+		if err != nil {
+			log.Printf("error updating database: %v", err)
+			return false
+		}
+
+		log.Printf("Entry updated successfully in db: %s", session.Name)
+		return true
+	}
+
+	return false, nil
 }
 
 func GetSessionsByUserFromDB(dblocation string, timeframe int) (SessionsByUser, error) {
