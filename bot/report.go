@@ -40,7 +40,7 @@ func botGenerateReports(chatID int64, bot *tgbotapi.BotAPI, dblocation string) {
 
 func TimeToReport() bool {
 	now := time.Now()
-	if now.Hour() == 23 && now.Minute() == 0 && now.Second() == 0 {
+	if now.Hour() == 10 && now.Minute() == 0 && now.Second() == 0 {
 		return true
 	}
 	return false
@@ -84,6 +84,7 @@ func GenerateReport(dblocation string) (string, error) {
 	}
 	if cleandb {
 		CleanDB(dblocation) //clean db after a weekly report
+		CreateDb(dblocation)
 	}
 	return report.String(), nil
 }
