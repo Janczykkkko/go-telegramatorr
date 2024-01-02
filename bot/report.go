@@ -22,7 +22,7 @@ func botGenerateReports(chatID int64, bot *tgbotapi.BotAPI, dblocation string) {
 				errorMsg := tgbotapi.NewMessage(chatID, "Failed to generate a report, please check the logs")
 				errorMsg.DisableNotification = true
 				if _, err := bot.Send(errorMsg); err != nil {
-					log.Printf("Error sending error message: %s", err)
+					log.Printf("Error sending error message :D: %s", err)
 				}
 				continue // Skips sending message
 			}
