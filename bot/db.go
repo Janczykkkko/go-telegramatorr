@@ -201,7 +201,7 @@ func GetSessionsByUserFromDB(dblocation string, timeframe int) (SessionsByUser, 
 			sessionsByUser[userIndex].Sessions = append(sessionsByUser[userIndex].Sessions, session)
 		}
 	}
-
+	//organise chronologically per user
 	for i := range sessionsByUser {
 		sort.SliceStable(sessionsByUser[i].Sessions, func(j, k int) bool {
 			return sessionsByUser[i].Sessions[j].EndTime.Before(sessionsByUser[i].Sessions[k].EndTime)
