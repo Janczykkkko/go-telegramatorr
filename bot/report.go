@@ -28,7 +28,7 @@ func intHandler(w http.ResponseWriter, r *http.Request) {
 	intParam := vars["int"]
 	response := ""
 
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 	time, err := strconv.Atoi(intParam)
 	if err != nil {
