@@ -3,69 +3,59 @@ package bot
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"strconv"
 	"strings"
-	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/gorilla/mux"
 )
 
-func botGenerateReports(chatID int64, bot *tgbotapi.BotAPI, dblocation string) {
-	//periodically check if should report & report
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-	for range ticker.C {
-		if TimeToReport() {
-			report, err := GenerateReport(dblocation)
-			if err != nil {
-				log.Println("Error generating report", err)
-				// Sending an error message instead
-				errorMsg := tgbotapi.NewMessage(chatID, "Failed to generate a report, please check the logs")
-				errorMsg.DisableNotification = true
-				if _, err := bot.Send(errorMsg); err != nil {
-					log.Printf("Error sending error message :D: %s", err)
-				}
-				continue // Skips sending message
-			}
-			// Sending the message if no error occurred during report generation
-			msg := tgbotapi.NewMessage(chatID, report)
-			msg.DisableNotification = true
-			if _, err := bot.Send(msg); err != nil {
-				log.Printf("Error sending report: %s", err)
-				continue
-			}
-			log.Println("Report succesfully generated and sent\n", report)
-		}
+func botGenerateReports(dblocation string) {
+	r := mux.NewRouter()
+
+	r.HandleFunc("/{int}", intHandler)
+
+	log.Println("Reports server listening on port 8080")
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		log.Println("Error starting server:", err)
 	}
 }
 
-func TimeToReport() bool {
-	now := time.Now()
-	if now.Hour() == 8 && now.Minute() == 0 && now.Second() == 0 {
-		return true
+func intHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	intParam := vars["int"]
+	response := ""
+
+	w.Header().Set("Content-Type", "text/plain")
+
+	time, err := strconv.Atoi(intParam)
+	if err != nil {
+		http.Error(w, "Invalid integer", http.StatusBadRequest)
+		return
 	}
-	return false
+	sessions, err := GenerateReport(dblocation, time)
+	if err != nil {
+		response = err.Error()
+		fmt.Fprintf(w, "%s", response)
+	}
+	fmt.Fprintf(w, "%s", sessions)
+
 }
 
-func GenerateReport(dblocation string) (string, error) {
-	reportTime := 24 //default daily
+func GenerateReport(dblocation string, time int) (string, error) {
 	showDays := false
-	cleandb := false
 	var report strings.Builder
-	if time.Now().Weekday() == time.Sunday {
-		reportTime = 168 //weekly
+	if time > 24 {
 		showDays = true
 	}
-	sessiondata, err := GetSessionsByUserFromDB(dblocation, reportTime)
+	sessiondata, err := GetSessionsByUserFromDB(dblocation, time)
 	if err != nil {
 		log.Println("Error getting data from db", err)
 		return "", err
 	}
-	if reportTime == 24 {
-		report.WriteString("Here's a daily report from media players:\n")
-	} else {
-		report.WriteString("Here's a weekly report from media players:\n")
-		cleandb = true
-	}
+	report.WriteString(fmt.Sprintf("Here's %d hour report from media players:\n", time))
 	report.WriteString("-------------\n")
 	for _, userSessions := range sessiondata {
 		report.WriteString(fmt.Sprintf("User: %s\n", userSessions.UserName))
@@ -81,10 +71,6 @@ func GenerateReport(dblocation string) (string, error) {
 				s.SubStream))
 		}
 		report.WriteString("-------------\n")
-	}
-	if cleandb {
-		CleanDB(dblocation) //clean db after a weekly report
-		CreateDb(dblocation)
 	}
 	return report.String(), nil
 }

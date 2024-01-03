@@ -35,7 +35,7 @@ func Init(jellyfinAddress, jellyfinApiKey, plexAddress, plexApiKey, telegramApiK
 	}
 
 	if report {
-		go botGenerateReports(chatID, bot, dblocation)
+		go botGenerateReports(dblocation)
 	}
 
 	select {}
