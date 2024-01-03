@@ -17,7 +17,7 @@ Currently has three functions:
     method: directplay  
     bitrate: 6.46 Mbps  
     subs: English-SRT  
-3. botReporter, which serves reports on port 8080 in plaintext (for now), for the time period specified in path i.e. /24 for 24 hours  
+3. botReporter, which serves reports on port 8080 in plaintext (for now), for the time period in hours specified in field     
     >Example:  
     Here's 10 hour report from media players:  
     "-------------"  
