@@ -30,11 +30,11 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := GenerateReport(dblocation, timeInt)
+	report, err := GenerateReport(dblocation, timeInt)
 	if err != nil {
-		response = err.Error()
+		report = err.Error()
 	}
-
+	htmlReport := "<p>" + strings.ReplaceAll(report, "\n", "<br>") + "</p>"
 	// Generate HTML response dynamically with a form field and default background color
 	htmlResponse := fmt.Sprintf(`
 		<!DOCTYPE html>
@@ -52,7 +52,7 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 			<p>%s</p>
 		</body>
 		</html>
-	`, timeInt, response)
+	`, timeInt, htmlReport)
 
 	// Write the HTML response to the client
 	w.Header().Set("Content-Type", "text/html")
