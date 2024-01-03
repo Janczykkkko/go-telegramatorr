@@ -6,42 +6,57 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/gorilla/mux"
 )
 
 func botGenerateReports(dblocation string) {
-	r := mux.NewRouter()
-
-	r.HandleFunc("/{int}", intHandler)
-
-	log.Println("Reports server listening on port 8080")
-	err := http.ListenAndServe(":8080", r)
+	http.HandleFunc("/", reportHandler)
+	fmt.Println("Server listening on port 8080")
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Println("Error starting server:", err)
 	}
 }
 
-func intHandler(w http.ResponseWriter, r *http.Request) {
+func reportHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the integer value from the query parameter or set a default value
+	time := r.URL.Query().Get("int")
+	if time == "" {
+		time = "24" // Default value if no parameter is provided
+	}
 
-	vars := mux.Vars(r)
-	intParam := vars["int"]
-	response := ""
-
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-
-	time, err := strconv.Atoi(intParam)
+	timeInt, err := strconv.Atoi(time)
 	if err != nil {
 		http.Error(w, "Invalid integer", http.StatusBadRequest)
 		return
 	}
-	sessions, err := GenerateReport(dblocation, time)
+
+	response, err := GenerateReport(dblocation, timeInt)
 	if err != nil {
 		response = err.Error()
-		fmt.Fprintf(w, "%s", response)
 	}
-	fmt.Fprintf(w, "%s", sessions)
 
+	// Generate HTML response dynamically with a form field and default background color
+	htmlResponse := fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title>Player sessions</title>
+		</head>
+		<body style="background-color: black; color: white;">
+			<h1>Player sessions</h1>
+			<form action="/" method="get">
+				<label for="intInput">Enter an Integer:</label>
+				<input type="number" id="intInput" name="int" value="%d">
+				<input type="submit" value="Submit">
+			</form>
+			<p>%s</p>
+		</body>
+		</html>
+	`, timeInt, response)
+
+	// Write the HTML response to the client
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(htmlResponse))
 }
 
 func GenerateReport(dblocation string, time int) (string, error) {
