@@ -20,19 +20,6 @@ Currently has three functions:
     bitrate: 6.46 Mbps  
     subs: English-SRT  
 
-3. botReporter, which reports daily and weekly (on sundays) (for now set to 8 a.m.) on what was played in the form of (per user):  
-    >Example:  
-    Here's a daily report from media players:  
-    User: User  
-    23:07 - Breaking Bad - Season 3 Episode 6 - Sunset on Plex(Chromecast) for 10 minutes  
-    method: directplay  
-    bitrate: 5.922 Mbps  
-    subs: English (SRT External)  
-    23:22 - Breaking Bad - Season 3 Episode 7 - One Minute on Plex(Chromecast) for 3 minutes  
-    method: directplay  
-    bitrate: 5.932 Mbps  
-    subs: English (SRT External)  
-
 Requires at least 3 env vars:  
 TELEGRAM_APIKEY (required),  
 and (to enable Jellyfin gatherer)  
@@ -43,8 +30,6 @@ PLEX_ADDRESS
 PLEX_APIKEY  
 and optionally (to enable botMonitor)  
 TELEGRAM_CHATID  
-and (to enable botReporter) (botMonitor must be enabled)  
-ENABLE_REPORTS (bool) & add volume at /data for db storage  
 
 EXAMPLE COMPOSE:   
 ```yaml  
@@ -61,7 +46,6 @@ services:
       TELEGRAM_CHATID: "REPLACE"
       PLEX_ADDRESS: "http://REPLACE:32400"
       PLEX_APIKEY: "REPLACE"
-      ENABLE_REPORTS: "true"
       TZ: "Europe/Warsaw"
     volumes:
       - /home/user/telegramator:/data #example hostpath for reporting db
