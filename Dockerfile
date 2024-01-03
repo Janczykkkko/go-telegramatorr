@@ -19,4 +19,6 @@ COPY --from=0 /app/telegramatorr .
 
 RUN apk add --no-cache tzdata
 
+EXPOSE 8080
+
 CMD ["/telegramatorr"]
