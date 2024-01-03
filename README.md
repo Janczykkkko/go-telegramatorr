@@ -19,7 +19,7 @@ Currently has three functions:
     subs: English-SRT  
 3. botReporter, which serves reports on port 8080 in plaintext (for now), for the time period specified in path i.e. /24 for 24 hours  
     >Example:  
-    Here's 10 hour report from media players:
+    Here's 10 hour report from media players:  
     "-------------"  
     User: User  
     22:51 - Show - Season 7 Episode 10 - episode on Plex(MiTV-MOOQ1) for 67 minutes  
