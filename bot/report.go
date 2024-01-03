@@ -40,6 +40,7 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 		<!DOCTYPE html>
 		<html>
 		<head>
+			<meta charset="UTF-8">
 			<title>Player sessions</title>
 		</head>
 		<body style="background-color: black; color: white;">
