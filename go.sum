@@ -1,8 +1,8 @@
-github.com/Janczykkkko/jellyplexgatherer v1.0.4-tests h1:StGKnDkleyQY4heI6BVSfIUtOQxDpBNySJt4c+hwKok=
-github.com/Janczykkkko/jellyplexgatherer v1.0.4-tests/go.mod h1:3j7mxkOpT396BG8NbMrPWrNUcu9/JLInKmCcDZLkVY4=
+github.com/Janczykkkko/jellyplexgatherer v1.0.4 h1:kwmzLYXshy+5x0h1nQmkFKvwIe8jyCzSn6C0je9+2wk=
+github.com/Janczykkkko/jellyplexgatherer v1.0.4/go.mod h1:3j7mxkOpT396BG8NbMrPWrNUcu9/JLInKmCcDZLkVY4=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 h1:wG8n/XJQ07TmjbITcGiUaOtXxdrINDz1b0J1w0SzqDc=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1/go.mod h1:A2S0CWkNylc2phvKXWBBdD3K0iGnDBGbzRpISP2zBl8=
-github.com/mattn/go-sqlite3 v1.14.19 h1:fhGleo2h1p8tVChob4I9HpmVFIAkKGpiukdrgQbWfGI=
-github.com/mattn/go-sqlite3 v1.14.19/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
-github.com/rs/xid v1.5.0 h1:mKX4bl4iPYJtEIxp6CYiUuLQ/8DYMoz0PUdtGgMFRVc=
-github.com/rs/xid v1.5.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
+github.com/mattn/go-sqlite3 v1.14.23 h1:gbShiuAP1W5j9UOksQ06aiiqPMxYecovVGwmTxWtuw0=
+github.com/mattn/go-sqlite3 v1.14.23/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
+github.com/rs/xid v1.6.0 h1:fV591PaemRlL6JfRxGDEPl69wICngIQ3shQtzfy2gxU=
+github.com/rs/xid v1.6.0/go.mod h1:7XoLgs4eV+QndskICGsho+ADou8ySMSjJKDIan90Nz0=
